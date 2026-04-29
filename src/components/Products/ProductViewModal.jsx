@@ -1,10 +1,6 @@
 import { Package, X } from "lucide-react";
 
-export default function ProductViewModal({
-  product,
-  isOpen,
-  onClose,
-}) {
+export default function ProductViewModal({ product, isOpen, onClose }) {
   if (!isOpen || !product) return null;
 
   return (
@@ -39,9 +35,7 @@ export default function ProductViewModal({
               <h3 className="text-base font-semibold text-[#f5f5f5]">
                 {product.name}
               </h3>
-              <p className="text-xs text-white/60">
-                Product Details
-              </p>
+              <p className="text-xs text-white/60">Product Details</p>
             </div>
           </div>
 
@@ -69,10 +63,7 @@ export default function ProductViewModal({
             },
             {
               label: "Status",
-              value:
-                product.stock > 0
-                  ? "In Stock"
-                  : "Out of Stock",
+              value: product.stock > 0 ? "In Stock" : "Out of Stock",
               isStatus: true,
             },
           ].map(({ label, value, isStatus }) => (
@@ -94,9 +85,7 @@ export default function ProductViewModal({
                 >
                   <span
                     className={`h-1.5 w-1.5 rounded-full ${
-                      product.stock > 0
-                        ? "bg-green-500"
-                        : "bg-red-500"
+                      product.stock > 0 ? "bg-green-500" : "bg-red-500"
                     }`}
                   />
                   {value}

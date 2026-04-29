@@ -14,18 +14,36 @@ import {
   BookUser,
   X,
 } from "lucide-react";
-import { NavLink } from "react-router-dom";
+import { href, NavLink } from "react-router-dom";
 import { useSidebar } from "../../context/SidebarContext";
+import { useState } from "react";
+import { useLocation } from "react-router-dom";
+import { useEffect } from "react";
 
 export default function Sidebar() {
+  const location = useLocation();
+  const [openMenu, setOpenMenu] = useState(null);
   const { isExpanded, isMobileOpen, closeMobileSidebar } = useSidebar();
 
   const sidebarItems = [
     { name: "Dashboard", href: "/", icon: LayoutDashboard },
     { name: "Manage Admins", href: "/manage-admins", icon: CircleUserRound },
-    { name: "Manage Teams and Departments", href: "/manage-teams", icon: Building2 },
+    {
+      name: "Manage Teams and Departments",
+      href: "/manage-teams",
+      icon: Building2,
+    },
     { name: "Purchase Orders", href: "/purchase-orders", icon: ShoppingCart },
-    { name: "Product List", href: "/product-list", icon: Package },
+    {
+      name: "Product List",
+      icon: Package,
+      href: "/products/list",
+      children: [
+        {name:"Products list" ,href:"/products/list"},
+        { name: "Product Groups", href: "/products/groups" },
+        { name: "HSN Groups", href: "/products/hsn-groups" },
+      ],
+    },
     { name: "BOM", href: "/bom", icon: ClipboardList },
     { name: "Inventory", href: "/inventory", icon: Boxes },
     { name: "Godowns", href: "/godowns", icon: Warehouse },
@@ -34,7 +52,15 @@ export default function Sidebar() {
     { name: "Invoicing", href: "/invoicing", icon: FileText },
     { name: "Quality Check", href: "/quality-check", icon: ShieldCheck },
   ];
-
+  const isProductRoute =location.pathname === "/products/list" ||  location.pathname.startsWith("/products/groups") ||    location.pathname.startsWith("/products/hsn-groups");
+useEffect(() => {
+  if (isProductRoute) {
+    setOpenMenu("Product List");
+  } else {
+    // This ensures other tabs close the dropdown
+    setOpenMenu(null);
+  }
+}, [location.pathname, isProductRoute]);
   return (
     <>
       {isMobileOpen && (
@@ -67,9 +93,7 @@ export default function Sidebar() {
             </div>
 
             {isExpanded && (
-              <span
-                className="text-[25px] font-semibold tracking-tight text-white"
-              >
+              <span className="text-[25px] font-semibold tracking-tight text-white">
                 Admin Panel
               </span>
             )}
@@ -92,6 +116,80 @@ export default function Sidebar() {
             {sidebarItems.map((item) => {
               const Icon = item.icon;
 
+              // ✅ DROPDOWN ITEM (Product List)
+              if (item.children) {
+                const isActive =
+                  location.pathname === item.href ||
+                  item.children.some((child) =>
+                    location.pathname.startsWith(child.href),
+                  );
+
+                return (
+                  <li key={item.name}>
+                    <div
+                      className={`flex items-center rounded-xl transition-all duration-200 ${
+                        isActive
+                          ? "bg-[#ccf0ca] text-[#1a5c18] dark:bg-[#1e3a5f] dark:text-[#6fcf69]"
+                          : "text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-[#11182b]"
+                      }`}
+                    >
+                      {/* ✅ MAIN LINK (navigation works now) */}
+                      <NavLink
+                        to={item.href}
+                        onClick={closeMobileSidebar}
+                        className={`flex items-center gap-3 px-4 py-3 flex-1 ${
+                          !isExpanded ? "justify-center" : ""
+                        }`}
+                      >
+                        <Icon className="h-5 w-5 shrink-0" />
+                        {isExpanded && (
+                          <span className="font-medium">{item.name}</span>
+                        )}
+                      </NavLink>
+
+                      {/* ✅ TOGGLE BUTTON (separate click) */}
+                      {isExpanded && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation(); // IMPORTANT
+                            setOpenMenu(
+                              openMenu === item.name ? null : item.name,
+                            );
+                          }}
+                          className="px-3"
+                        >
+                          {openMenu === item.name ? "▾" : "▸"}
+                        </button>
+                      )}
+                    </div>
+
+                    {/* ✅ CHILD ITEMS */}
+                    {openMenu === item.name && isExpanded && (
+                      <ul className="ml-8 mt-1 space-y-1">
+                        {item.children.map((child) => (
+                          <li key={child.name}>
+                            <NavLink
+                              to={child.href}
+                              onClick={closeMobileSidebar}
+                              className={({ isActive }) =>
+                                `block rounded-lg px-3 py-2 text-sm ${
+                                  isActive
+                                    ? "bg-[#ccf0ca] text-[#1a5c18] dark:bg-[#1e3a5f] dark:text-[#6fcf69]"
+                                    : "text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-[#11182b]"
+                                }`
+                              }
+                            >
+                              {child.name}
+                            </NavLink>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </li>
+                );
+              }
+
+              // ✅ NORMAL ITEMS (everything else)
               return (
                 <li key={item.name}>
                   <NavLink
