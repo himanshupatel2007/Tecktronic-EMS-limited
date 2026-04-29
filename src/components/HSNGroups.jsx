@@ -17,7 +17,7 @@ export default function HSNGroups() {
   };
 
   return (
-    <div className="p-4 space-y-6 font-sans">
+    <div className=" space-y-6 font-sans">
       <div className="flex gap-3">
         <button
           onClick={() => setShowForm(true)}

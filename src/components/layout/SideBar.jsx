@@ -14,7 +14,7 @@ import {
   BookUser,
   X,
 } from "lucide-react";
-import { href, NavLink } from "react-router-dom";
+import {  NavLink } from "react-router-dom";
 import { useSidebar } from "../../context/SidebarContext";
 import { useState } from "react";
 import { useLocation } from "react-router-dom";
@@ -35,7 +35,7 @@ export default function Sidebar() {
     },
     { name: "Purchase Orders", href: "/purchase-orders", icon: ShoppingCart },
     {
-      name: "Product List",
+      name: "Product",
       icon: Package,
       href: "/products/list",
       children: [
@@ -56,16 +56,14 @@ export default function Sidebar() {
     location.pathname === "/products/list" ||
     location.pathname.startsWith("/products/groups") ||
     location.pathname.startsWith("/products/hsn-groups");
-
-    
   useEffect(() => {
     if (isProductRoute) {
-      setOpenMenu("Product List");
+      setOpenMenu("Product");
     } else {
       // This ensures other tabs close the dropdown
       setOpenMenu(null);
     }
-  }, [location.pathname, isProductRoute]);
+  }, [ isProductRoute]);
   return (
     <>
       {isMobileOpen && (
