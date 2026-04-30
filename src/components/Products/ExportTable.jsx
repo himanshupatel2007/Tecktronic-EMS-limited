@@ -3,7 +3,6 @@ import autoTable from "jspdf-autotable";
 import { FileText, Printer } from "lucide-react";
 
 export default function ExportTable({ title, columns, data }) {
-
   // 🔹 PDF Export
   const handleExportPDF = () => {
     const doc = new jsPDF();
@@ -13,10 +12,8 @@ export default function ExportTable({ title, columns, data }) {
 
     autoTable(doc, {
       startY: 20,
-      head: [columns.map(col => col.label)],
-      body: data.map(row =>
-        columns.map(col => row[col.key])
-      ),
+      head: [columns.map((col) => col.label)],
+      body: data.map((row) => columns.map((col) => row[col.key])),
       styles: {
         fontSize: 8,
       },
@@ -50,17 +47,17 @@ export default function ExportTable({ title, columns, data }) {
           <table>
             <thead>
               <tr>
-                ${columns.map(col => `<th>${col.label}</th>`).join("")}
+                ${columns.map((col) => `<th>${col.label}</th>`).join("")}
               </tr>
             </thead>
             <tbody>
               ${data
                 .map(
-                  row => `
+                  (row) => `
                   <tr>
-                    ${columns.map(col => `<td>${row[col.key] || ""}</td>`).join("")}
+                    ${columns.map((col) => `<td>${row[col.key] || ""}</td>`).join("")}
                   </tr>
-                `
+                `,
                 )
                 .join("")}
             </tbody>

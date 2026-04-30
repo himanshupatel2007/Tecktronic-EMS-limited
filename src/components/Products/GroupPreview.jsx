@@ -1,4 +1,12 @@
-import { Eye, Pencil, Trash2, Boxes, Filter, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Eye,
+  Pencil,
+  Trash2,
+  Boxes,
+  Filter,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { useState } from "react";
 import ExportTable from "./ExportTable"; // adjust path
 
@@ -15,7 +23,9 @@ export default function GroupPreview({ groups, onDelete }) {
   });
 
   // Derive unique filter options from data
-  const uniqueValues = (key) => [...new Set(groups.map((g) => g[key]).filter(Boolean))];
+  const uniqueValues = (key) => [
+    ...new Set(groups.map((g) => g[key]).filter(Boolean)),
+  ];
 
   // Apply filters
   const filteredGroups = groups.filter((group) => {
@@ -31,7 +41,7 @@ export default function GroupPreview({ groups, onDelete }) {
   const totalPages = Math.ceil(filteredGroups.length / ITEMS_PER_PAGE);
   const paginatedGroups = filteredGroups.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
+    currentPage * ITEMS_PER_PAGE,
   );
 
   const handleFilterChange = (key, value) => {
@@ -49,46 +59,43 @@ export default function GroupPreview({ groups, onDelete }) {
   return (
     <>
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-[#162033] dark:bg-[#0d1528]">
-
         {/* Header */}
-     <div
-  className="border-b border-slate-200 px-6 py-5 dark:border-[#162033]"
-  style={{ backgroundColor: "#3a3c44" }}
->
-  <div className="flex items-center justify-between">
+        <div
+          className="border-b border-slate-200 px-6 py-5 dark:border-[#162033]"
+          style={{ backgroundColor: "#3a3c44" }}
+        >
+          <div className="flex items-center justify-between">
+            {/* LEFT SIDE */}
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10">
+                <Boxes className="h-5 w-5 text-white" />
+              </div>
 
-    {/* LEFT SIDE */}
-    <div className="flex items-center gap-3">
-      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10">
-        <Boxes className="h-5 w-5 text-white" />
-      </div>
+              <div>
+                <h2 className="text-lg font-semibold text-white">
+                  Product Group List
+                </h2>
+                <p className="text-xs text-white/60">
+                  {filteredGroups.length} Group
+                  {filteredGroups.length !== 1 ? "s" : ""} Available
+                </p>
+              </div>
+            </div>
 
-      <div>
-        <h2 className="text-lg font-semibold text-white">
-          Product Group List
-        </h2>
-        <p className="text-xs text-white/60">
-          {filteredGroups.length} Group
-          {filteredGroups.length !== 1 ? "s" : ""} Available
-        </p>
-      </div>
-    </div>
-
-    {/* ✅ RIGHT SIDE (EXPORT BUTTONS) */}
-    <ExportTable
-      title="Product Groups"
-      columns={[
-        { label: "Group Name", key: "groupName" },
-        { label: "Type", key: "type" },
-        { label: "Industry", key: "industry" },
-        { label: "Sector", key: "sector" },
-        { label: "Status", key: "status" },
-      ]}
-      data={filteredGroups} // important
-    />
-
-  </div>
-</div>
+            {/* ✅ RIGHT SIDE (EXPORT BUTTONS) */}
+            <ExportTable
+              title="Product Groups"
+              columns={[
+                { label: "Group Name", key: "groupName" },
+                { label: "Type", key: "type" },
+                { label: "Industry", key: "industry" },
+                { label: "Sector", key: "sector" },
+                { label: "Status", key: "status" },
+              ]}
+              data={filteredGroups} // important
+            />
+          </div>
+        </div>
 
         {/* Filter Bar */}
         <div className="flex flex-wrap items-center gap-3 border-b border-slate-100 bg-slate-50 px-6 py-3 dark:border-[#162033] dark:bg-[#0d1f38]">
@@ -133,7 +140,14 @@ export default function GroupPreview({ groups, onDelete }) {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-slate-100 dark:border-[#162033]">
-                {["Group Name", "Type", "Industry", "Sector", "Status", "Actions"].map((heading) => (
+                {[
+                  "Group Name",
+                  "Type",
+                  "Industry",
+                  "Sector",
+                  "Status",
+                  "Actions",
+                ].map((heading) => (
                   <th
                     key={heading}
                     className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500"
@@ -147,7 +161,10 @@ export default function GroupPreview({ groups, onDelete }) {
             <tbody className="divide-y divide-slate-100 dark:divide-[#162033]">
               {paginatedGroups.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-10 text-center text-sm text-slate-400">
+                  <td
+                    colSpan={6}
+                    className="py-10 text-center text-sm text-slate-400"
+                  >
                     No groups match the selected filters
                   </td>
                 </tr>
@@ -167,19 +184,27 @@ export default function GroupPreview({ groups, onDelete }) {
                           <p className="font-semibold text-slate-800 dark:text-slate-100">
                             {group.groupName}
                           </p>
-                          <p className="text-xs text-slate-400">{group.category}</p>
+                          <p className="text-xs text-slate-400">
+                            {group.category}
+                          </p>
                         </div>
                       </div>
                     </td>
 
                     {/* Type */}
-                    <td className="px-6 py-4 text-slate-700 dark:text-slate-300">{group.type}</td>
+                    <td className="px-6 py-4 text-slate-700 dark:text-slate-300">
+                      {group.type}
+                    </td>
 
                     {/* Industry */}
-                    <td className="px-6 py-4 text-slate-700 dark:text-slate-300">{group.industry}</td>
+                    <td className="px-6 py-4 text-slate-700 dark:text-slate-300">
+                      {group.industry}
+                    </td>
 
                     {/* Sector */}
-                    <td className="px-6 py-4 text-slate-700 dark:text-slate-300">{group.sector}</td>
+                    <td className="px-6 py-4 text-slate-700 dark:text-slate-300">
+                      {group.sector}
+                    </td>
 
                     {/* Status */}
                     <td className="px-6 py-4">
@@ -192,7 +217,9 @@ export default function GroupPreview({ groups, onDelete }) {
                       >
                         <span
                           className={`h-1.5 w-1.5 rounded-full ${
-                            group.status === "active" ? "bg-green-500" : "bg-red-500"
+                            group.status === "active"
+                              ? "bg-green-500"
+                              : "bg-red-500"
                           }`}
                         />
                         {group.status}
@@ -256,22 +283,26 @@ export default function GroupPreview({ groups, onDelete }) {
                 <ChevronLeft className="h-4 w-4" />
               </button>
 
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <button
-                  key={page}
-                  onClick={() => setCurrentPage(page)}
-                  className={`flex h-8 w-8 items-center justify-center rounded-lg text-xs font-semibold transition-colors ${
-                    page === currentPage
-                      ? "bg-[#2563eb] text-white"
-                      : "border border-slate-200 text-slate-500 hover:bg-slate-50 dark:border-[#1b2740] dark:text-slate-400 dark:hover:bg-[#11182b]"
-                  }`}
-                >
-                  {page}
-                </button>
-              ))}
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                (page) => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`flex h-8 w-8 items-center justify-center rounded-lg text-xs font-semibold transition-colors ${
+                      page === currentPage
+                        ? "bg-[#2563eb] text-white"
+                        : "border border-slate-200 text-slate-500 hover:bg-slate-50 dark:border-[#1b2740] dark:text-slate-400 dark:hover:bg-[#11182b]"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ),
+              )}
 
               <button
-                onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                onClick={() =>
+                  setCurrentPage((p) => Math.min(p + 1, totalPages))
+                }
                 disabled={currentPage === totalPages}
                 className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-[#1b2740] dark:text-slate-400 dark:hover:bg-[#11182b]"
               >

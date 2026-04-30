@@ -13,8 +13,9 @@ import {
   ShieldCheck,
   BookUser,
   X,
+  IndianRupeeIcon,
 } from "lucide-react";
-import {  NavLink } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { useSidebar } from "../../context/SidebarContext";
 import { useState } from "react";
 import { useLocation } from "react-router-dom";
@@ -35,7 +36,17 @@ export default function Sidebar() {
     },
     { name: "Purchase Orders", href: "/purchase-orders", icon: ShoppingCart },
     {
-      name: "Product",
+      name: "Cash & Banks",
+      href: "/transactions/cash-book",
+      icon: IndianRupeeIcon,
+      children: [
+        { name: "Cash Book", href: "/transactions/cash-book" },
+        { name: "Bank Book", href: "/transactions/bank-book" },
+        { name: "Manage Banks", href: "/transactions/manage-banks" },
+      ],
+    },
+    {
+      name: "Products",
       icon: Package,
       href: "/products/list",
       children: [
@@ -52,18 +63,18 @@ export default function Sidebar() {
     { name: "Invoicing", href: "/invoicing", icon: FileText },
     { name: "Quality Check", href: "/quality-check", icon: ShieldCheck },
   ];
-  const isProductRoute =
-    location.pathname === "/products/list" ||
-    location.pathname.startsWith("/products/groups") ||
-    location.pathname.startsWith("/products/hsn-groups");
+  const isProductRoute = location.pathname.startsWith("/products");
+  const isCashBankOpen = location.pathname.startsWith("/transactions");
   useEffect(() => {
     if (isProductRoute) {
-      setOpenMenu("Product");
+      setOpenMenu("Products");
     } else {
-      // This ensures other tabs close the dropdown
-      setOpenMenu(null);
+      if (isCashBankOpen) setOpenMenu("Cash & Banks");
+      else
+        // This ensures other tabs close the dropdown
+        setOpenMenu(null);
     }
-  }, [ isProductRoute]);
+  }, [isProductRoute, isCashBankOpen]);
   return (
     <>
       {isMobileOpen && (
@@ -170,21 +181,23 @@ export default function Sidebar() {
                     {openMenu === item.name && isExpanded && (
                       <ul className="ml-8 mt-1 space-y-1">
                         {item.children.map((child) => (
-                          <li key={child.name}>
-                            <NavLink
-                              to={child.href}
-                              onClick={closeMobileSidebar}
-                              className={({ isActive }) =>
-                                `block rounded-lg px-3 py-2 text-sm ${
-                                  isActive
-                                    ? "bg-[#ccf0ca] text-[#1a5c18] dark:bg-[#1e3a5f] dark:text-[#6fcf69]"
-                                    : "text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-[#11182b]"
-                                }`
-                              }
-                            >
-                              {child.name}
-                            </NavLink>
-                          </li>
+                          <>
+                            <li className="" key={child.name}>
+                              <NavLink
+                                to={child.href}
+                                onClick={closeMobileSidebar}
+                                className={({ isActive }) =>
+                                  `block rounded-lg px-3 py-2 text-sm ${
+                                    isActive
+                                      ? "bg-[#ccf0ca] text-[#1a5c18] dark:bg-[#1e3a5f] dark:text-[#6fcf69]"
+                                      : "text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-[#11182b]"
+                                  }`
+                                }
+                              >
+                                {child.name}
+                              </NavLink>
+                            </li>
+                          </>
                         ))}
                       </ul>
                     )}

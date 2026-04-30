@@ -15,7 +15,7 @@ export default function ProductGroups() {
       ...prev,
     ]);
     // Also close the form automatically after adding
-    setActiveForm(null); 
+    setActiveForm(null);
   };
 
   const handleDeleteGroup = (id) => {
@@ -45,8 +45,8 @@ export default function ProductGroups() {
 
       {/* Form Section */}
       {activeForm === "group" && (
-        <AddProductGroupForm 
-          onAdd={handleAddGroup} 
+        <AddProductGroupForm
+          onAdd={handleAddGroup}
           onClose={() => setActiveForm(null)} // This is the logic you requested
         />
       )}

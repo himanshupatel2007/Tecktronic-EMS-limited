@@ -28,10 +28,7 @@ export default function HSNGroups() {
       </div>
 
       {showForm && (
-        <AddHSNGroup
-          onAdd={handleAdd}
-          onClose={() => setShowForm(false)}
-        />
+        <AddHSNGroup onAdd={handleAdd} onClose={() => setShowForm(false)} />
       )}
 
       <HSNPreview hsnGroups={hsnGroups} onDelete={handleDelete} />

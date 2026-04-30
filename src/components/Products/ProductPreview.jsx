@@ -1,5 +1,13 @@
 import React, { useState } from "react";
-import { Eye, Pencil, Trash2, Package, ChevronLeft, ChevronRight, Filter } from "lucide-react";
+import {
+  Eye,
+  Pencil,
+  Trash2,
+  Package,
+  ChevronLeft,
+  ChevronRight,
+  Filter,
+} from "lucide-react";
 import ProductViewModal from "./ProductViewModal";
 import ExportTable from "./ExportTable"; // adjust path
 
@@ -16,15 +24,19 @@ export default function ProductPreview({ products, onDelete }) {
   });
 
   // Derive unique filter options from data
-  const uniqueValues = (key) => [...new Set(products.map((p) => p[key]).filter(Boolean))];
+  const uniqueValues = (key) => [
+    ...new Set(products.map((p) => p[key]).filter(Boolean)),
+  ];
 
   // Apply filters
   const filteredProducts = products.filter((product) => {
     return (
       (filters.category === "" || product.category === filters.category) &&
       (filters.type === "" || product.type === filters.type) &&
-      (filters.productStatus === "" || product.productStatus === filters.productStatus) &&
-      (filters.productGroup === "" || product.productGroup === filters.productGroup)
+      (filters.productStatus === "" ||
+        product.productStatus === filters.productStatus) &&
+      (filters.productGroup === "" ||
+        product.productGroup === filters.productGroup)
     );
   });
 
@@ -32,7 +44,7 @@ export default function ProductPreview({ products, onDelete }) {
   const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
   const paginatedProducts = filteredProducts.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
+    currentPage * ITEMS_PER_PAGE,
   );
 
   // Group paginated products
@@ -60,42 +72,42 @@ export default function ProductPreview({ products, onDelete }) {
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-[#162033] dark:bg-[#0d1528]">
         {/* Header */}
         <div
-  className="border-b border-slate-200 px-6 py-5 dark:border-[#162033]"
-  style={{ backgroundColor: "#3a3c44" }}
->
-  <div className="flex items-center justify-between">
+          className="border-b border-slate-200 px-6 py-5 dark:border-[#162033]"
+          style={{ backgroundColor: "#3a3c44" }}
+        >
+          <div className="flex items-center justify-between">
+            {/* LEFT */}
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10">
+                <Package className="h-5 w-5 text-white" />
+              </div>
 
-    {/* LEFT */}
-    <div className="flex items-center gap-3">
-      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10">
-        <Package className="h-5 w-5 text-white" />
-      </div>
+              <div>
+                <h2 className="text-lg font-semibold text-white">
+                  Product List
+                </h2>
+                <p className="text-xs text-white/60">
+                  {filteredProducts.length} Product
+                  {filteredProducts.length !== 1 ? "s" : ""} Available
+                </p>
+              </div>
+            </div>
 
-      <div>
-        <h2 className="text-lg font-semibold text-white">Product List</h2>
-        <p className="text-xs text-white/60">
-          {filteredProducts.length} Product
-          {filteredProducts.length !== 1 ? "s" : ""} Available
-        </p>
-      </div>
-    </div>
-
-    {/* ✅ RIGHT (EXPORT) */}
-    <ExportTable
-      title="Products"
-      columns={[
-        { label: "Product Name", key: "productName" },
-        { label: "Product Code", key: "productCode" },
-        { label: "Category", key: "category" },
-        { label: "Type", key: "type" },
-        { label: "Status", key: "productStatus" },
-        { label: "Group", key: "productGroup" },
-      ]}
-      data={filteredProducts} // important
-    />
-
-  </div>
-</div>
+            {/* ✅ RIGHT (EXPORT) */}
+            <ExportTable
+              title="Products"
+              columns={[
+                { label: "Product Name", key: "productName" },
+                { label: "Product Code", key: "productCode" },
+                { label: "Category", key: "category" },
+                { label: "Type", key: "type" },
+                { label: "Status", key: "productStatus" },
+                { label: "Group", key: "productGroup" },
+              ]}
+              data={filteredProducts} // important
+            />
+          </div>
+        </div>
 
         {/* Filter Bar */}
         <div className="flex flex-wrap items-center gap-3 border-b border-slate-100 bg-slate-50 px-6 py-3 dark:border-[#162033] dark:bg-[#0d1f38]">
@@ -140,7 +152,14 @@ export default function ProductPreview({ products, onDelete }) {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-slate-100 dark:border-[#162033]">
-                {["Product", "Product Code", "Category", "Type", "Status", "Actions"].map((heading) => (
+                {[
+                  "Product",
+                  "Product Code",
+                  "Category",
+                  "Type",
+                  "Status",
+                  "Actions",
+                ].map((heading) => (
                   <th
                     key={heading}
                     className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500"
@@ -154,7 +173,10 @@ export default function ProductPreview({ products, onDelete }) {
             <tbody className="divide-y divide-slate-100 dark:divide-[#162033]">
               {paginatedProducts.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-10 text-center text-sm text-slate-400">
+                  <td
+                    colSpan={6}
+                    className="py-10 text-center text-sm text-slate-400"
+                  >
                     No products match the selected filters
                   </td>
                 </tr>
@@ -186,7 +208,9 @@ export default function ProductPreview({ products, onDelete }) {
                               <p className="font-semibold text-slate-800 dark:text-slate-100">
                                 {product.productName}
                               </p>
-                              <p className="text-xs text-slate-400">{product.productHSN}</p>
+                              <p className="text-xs text-slate-400">
+                                {product.productHSN}
+                              </p>
                             </div>
                           </div>
                         </td>
@@ -217,7 +241,9 @@ export default function ProductPreview({ products, onDelete }) {
                           >
                             <span
                               className={`h-1.5 w-1.5 rounded-full ${
-                                product.productStatus === "Active" ? "bg-green-500" : "bg-red-500"
+                                product.productStatus === "Active"
+                                  ? "bg-green-500"
+                                  : "bg-red-500"
                               }`}
                             />
                             {product.productStatus}
@@ -265,7 +291,10 @@ export default function ProductPreview({ products, onDelete }) {
               Showing{" "}
               <span className="font-semibold text-slate-600 dark:text-slate-300">
                 {(currentPage - 1) * ITEMS_PER_PAGE + 1}–
-                {Math.min(currentPage * ITEMS_PER_PAGE, filteredProducts.length)}
+                {Math.min(
+                  currentPage * ITEMS_PER_PAGE,
+                  filteredProducts.length,
+                )}
               </span>{" "}
               of{" "}
               <span className="font-semibold text-slate-600 dark:text-slate-300">
@@ -283,22 +312,26 @@ export default function ProductPreview({ products, onDelete }) {
                 <ChevronLeft className="h-4 w-4" />
               </button>
 
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <button
-                  key={page}
-                  onClick={() => setCurrentPage(page)}
-                  className={`flex h-8 w-8 items-center justify-center rounded-lg text-xs font-semibold transition-colors ${
-                    page === currentPage
-                      ? "bg-[#2563eb] text-white"
-                      : "border border-slate-200 text-slate-500 hover:bg-slate-50 dark:border-[#1b2740] dark:text-slate-400 dark:hover:bg-[#11182b]"
-                  }`}
-                >
-                  {page}
-                </button>
-              ))}
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                (page) => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`flex h-8 w-8 items-center justify-center rounded-lg text-xs font-semibold transition-colors ${
+                      page === currentPage
+                        ? "bg-[#2563eb] text-white"
+                        : "border border-slate-200 text-slate-500 hover:bg-slate-50 dark:border-[#1b2740] dark:text-slate-400 dark:hover:bg-[#11182b]"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ),
+              )}
 
               <button
-                onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                onClick={() =>
+                  setCurrentPage((p) => Math.min(p + 1, totalPages))
+                }
                 disabled={currentPage === totalPages}
                 className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-[#1b2740] dark:text-slate-400 dark:hover:bg-[#11182b]"
               >

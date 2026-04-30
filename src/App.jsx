@@ -8,7 +8,7 @@ import NotFound from "./components/pages/NotFound";
 import ManageAdmins from "./components/ManageAdmin";
 import PurchaseOrders from "./components/PurchaseOrders";
 import ProductList from "./components/ProductList";
-import ProductGroups from "./components/ProductGroups"; 
+import ProductGroups from "./components/ProductGroups";
 import HSNGroups from "./components/HSNGroups";
 
 export default function App() {
@@ -21,12 +21,16 @@ export default function App() {
           <Route path="/" index element={<Overview />} />
           <Route path="/manage-admins" index element={<ManageAdmins />} />
           <Route path="/purchase-orders" index element={<PurchaseOrders />} />
-         <Route path="/products">
-            <Route  index path="list" element={<ProductList />} /> 
-            <Route path="groups" element={<ProductGroups />} /> 
+          <Route path="/products">
+            <Route index path="list" element={<ProductList />} />
+            <Route path="groups" element={<ProductGroups />} />
             <Route path="hsn-groups" element={<HSNGroups />} />
           </Route>
-
+          <Route path="/transactions">
+            <Route index path="cash-book" element={<ProductList />} />
+            <Route path="bank-book" element={<ProductGroups />} />
+            <Route path="manage-banks" element={<HSNGroups />} />
+          </Route>
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>

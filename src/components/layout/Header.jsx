@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Search, Menu, BellDot, UserPen } from "lucide-react";
+import { Menu, BellDot, UserPen } from "lucide-react";
 import { useSidebar } from "../../context/SidebarContext";
 import { ThemeToggleButton } from "../ThemToggleButton";
 import LoginButton from "../Buttons/LoginButton";
@@ -48,7 +48,8 @@ export default function Header() {
               color: "#f5f5f5",
             }}
             onMouseEnter={(e) =>
-              (e.currentTarget.style.backgroundColor = "rgba(245, 245, 245, 0.08)")
+              (e.currentTarget.style.backgroundColor =
+                "rgba(245, 245, 245, 0.08)")
             }
             onMouseLeave={(e) =>
               (e.currentTarget.style.backgroundColor = "transparent")
@@ -75,7 +76,8 @@ export default function Header() {
                 color: "#f5f5f5",
               }}
               onMouseEnter={(e) =>
-                (e.currentTarget.style.backgroundColor = "rgba(245, 245, 245, 0.08)")
+                (e.currentTarget.style.backgroundColor =
+                  "rgba(245, 245, 245, 0.08)")
               }
               onMouseLeave={(e) =>
                 (e.currentTarget.style.backgroundColor = "transparent")

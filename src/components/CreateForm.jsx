@@ -1,91 +1,37 @@
 import { useState } from "react";
-import { Plus, Boxes, Hash, Package, Upload } from "lucide-react";
-const initialState = {
-  groupName: "",
-  type: "",
-  industry: "",
-  sector: "",
-  category: "",
-  status: "active",
-};
-const fields = [
-  {
-    name: "groupName",
-    label: "Group Name",
-    icon: Boxes,
-    type: "text",
-    placeholder: "e.g. Red T-Shirt",
-  },
-  {
-    name: "type",
-    label: "Type",
-    icon: Hash,
-    type: "text",
-    placeholder: "e.g. Regular",
-  },
-  {
-    name: "industry",
-    label: "Industry",
-    icon: Package,
-    type: "text",
-    placeholder: "e.g. Clothing",
-  },
-  {
-    name: "sector",
-    label: "Sector",
-    icon: Package,
-    type: "select", // Changed to select
-    options: [
-      "Apparel & Textiles",
-      "Electronics",
-      "Automotive",
-      "FMCG",
-      "Pharmaceuticals",
-      "Footwear",
-    ],
-  },
-  {
-    name: "category",
-    label: "Category",
-    icon: Hash,
-    type: "select", // Changed to select
-    options: [
-      "On Demand",
-      "Stock Item",
-      "Raw Material",
-      "Work in Progress",
-      "Finished Goods",
-    ],
-  },
-  {
-    name: "status",
-    label: "Status",
-    icon: Hash,
-    type: "select",
-    options: ["active", "inactive"],
-  },
-];
+import { Plus, Upload } from "lucide-react";
 
-export default function AddProductGroupForm({ onAdd }) {
+export default function CreateForm({
+  title = "Create",
+  subtitle = "",
+  fields = [],
+  initialState = {},
+  onSubmit,
+  onImport,
+}) {
   const [formData, setFormData] = useState(initialState);
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [e.target.name]:
+        e.target.type === "checkbox"
+          ? e.target.checked
+          : e.target.value,
     });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    onAdd({
+    onSubmit({
       ...formData,
       id: Date.now(),
     });
 
     setFormData(initialState);
   };
+
   const handleImport = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -95,14 +41,13 @@ export default function AddProductGroupForm({ onAdd }) {
     reader.onload = (event) => {
       const text = event.target.result;
 
-      const rows = text.split("\n").map((row) => row.split(","));
+      const rows = text.split("\n").map((r) => r.split(","));
       const headers = rows[0];
 
-      const importedGroups = rows.slice(1).map((row) => {
+      const imported = rows.slice(1).map((row) => {
         const obj = {};
-
-        headers.forEach((header, index) => {
-          obj[header.trim()] = row[index]?.trim();
+        headers.forEach((h, i) => {
+          obj[h.trim()] = row[i]?.trim();
         });
 
         return {
@@ -111,8 +56,7 @@ export default function AddProductGroupForm({ onAdd }) {
         };
       });
 
-      // ✅ directly push to table
-      importedGroups.forEach((group) => onAdd(group));
+      imported.forEach((item) => onImport(item));
     };
 
     reader.readAsText(file);
@@ -120,7 +64,8 @@ export default function AddProductGroupForm({ onAdd }) {
 
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-[#162033] dark:bg-[#0d1528]">
-      {/* Header */}
+      
+      {/* HEADER (EXACT SAME) */}
       <div
         className="border-b border-slate-200 px-6 py-5 flex items-center justify-between dark:border-[#162033]"
         style={{ backgroundColor: "#3a3c44" }}
@@ -132,15 +77,15 @@ export default function AddProductGroupForm({ onAdd }) {
 
           <div>
             <h2 className="text-lg font-semibold text-white">
-              Add Product Group
+              {title}
             </h2>
             <p className="text-xs text-white/60">
-              add your product group details here
+              {subtitle}
             </p>
           </div>
         </div>
 
-        {/* ✅ IMPORT BUTTON */}
+        {/* IMPORT BUTTON (SAME) */}
         <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-white/20 px-3 py-2 text-xs font-medium text-white hover:bg-white/10">
           <Upload className="h-4 w-4" />
           Import
@@ -152,7 +97,8 @@ export default function AddProductGroupForm({ onAdd }) {
           />
         </label>
       </div>
-      {/* Form */}
+
+      {/* FORM BODY (EXACT GRID + STYLE) */}
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 gap-5 p-6 md:grid-cols-2">
           {fields.map((field) => {
@@ -186,7 +132,6 @@ export default function AddProductGroupForm({ onAdd }) {
                       name={field.name}
                       value={formData[field.name]}
                       onChange={handleChange}
-                      required
                       placeholder={field.placeholder}
                       className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-11 pr-4 text-sm text-slate-800 outline-none transition-all placeholder:text-slate-400 focus:border-[#44a83e] focus:bg-white focus:ring-4 focus:ring-green-100 dark:border-[#1b2740] dark:bg-[#11182b] dark:text-slate-100 dark:focus:ring-green-900/20"
                     />
@@ -197,14 +142,14 @@ export default function AddProductGroupForm({ onAdd }) {
           })}
         </div>
 
-        {/* Submit Button */}
+        {/* SUBMIT BUTTON (SAME STYLE) */}
         <div className="px-6 pb-6">
           <button
             type="submit"
             className="flex items-center gap-2 rounded-xl bg-[#44a83e] px-6 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-[#3c9437] active:scale-95"
           >
             <Plus className="h-4 w-4" />
-            Create Group
+            Create
           </button>
         </div>
       </form>
