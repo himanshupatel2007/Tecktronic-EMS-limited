@@ -1,9 +1,7 @@
 import { useState } from "react";
-import CreateForm from "../CreateForm";
 import CreateTable from "../CreateTable";
 import { Trash2, Eye, Pencil, Hash, Package } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
 const EMPTY_FORM = {
   checklistCode: "",
   checklistName: "",
@@ -13,11 +11,10 @@ const EMPTY_FORM = {
 };
 
 export default function QCChecklists() {
-  const navigate = useNavigate();
-
   const [checklists, setChecklists] = useState([]);
   const [formData, setFormData] = useState(EMPTY_FORM);
   const [activeForm, setActiveForm] = useState(false);
+  const navigate = useNavigate();
 
   // ── ITEMS ──────────────────────────────────────────────
 
@@ -26,7 +23,15 @@ export default function QCChecklists() {
       ...prev,
       items: [
         ...prev.items,
-        { name: "", subName: "", valueType: "", min: "", max: "", same: "", tool: "" },
+        {
+          name: "",
+          subName: "",
+          valueType: "",
+          min: "",
+          max: "",
+          same: "",
+          tool: "",
+        },
       ],
     }));
   };
@@ -90,11 +95,13 @@ export default function QCChecklists() {
 
   const actions = [
     {
-      label: "View",
-      icon: Eye,
-      onClick: (row) =>
-        navigate("/quality/checklist-report", { state: { checklist: row } }),
-    },
+    label: "View",
+    icon: Eye,
+    onClick: (row) =>
+      navigate("/quality/checklist-receipt", {
+        state: { checklist: row },
+      }),
+  },
     {
       label: "Edit",
       icon: Pencil,
@@ -171,16 +178,23 @@ export default function QCChecklists() {
               <>
                 {/* Column headers */}
                 <div className="grid grid-cols-8 gap-2 mb-1 px-1">
-                  {["Name", "Sub Name", "Type", "Min", "Max", "Same", "Tool", ""].map(
-                    (h, i) => (
-                      <span
-                        key={i}
-                        className="text-xs font-semibold uppercase tracking-wider text-slate-400"
-                      >
-                        {h}
-                      </span>
-                    )
-                  )}
+                  {[
+                    "Name",
+                    "Sub Name",
+                    "Type",
+                    "Min",
+                    "Max",
+                    "Same",
+                    "Tool",
+                    "",
+                  ].map((h, i) => (
+                    <span
+                      key={i}
+                      className="text-xs font-semibold uppercase tracking-wider text-slate-400"
+                    >
+                      {h}
+                    </span>
+                  ))}
                 </div>
 
                 {formData.items.map((item, i) => (
@@ -189,18 +203,24 @@ export default function QCChecklists() {
                       placeholder="Name"
                       className="input"
                       value={item.name}
-                      onChange={(e) => handleItemChange(i, "name", e.target.value)}
+                      onChange={(e) =>
+                        handleItemChange(i, "name", e.target.value)
+                      }
                     />
                     <input
                       placeholder="Sub Name"
                       className="input"
                       value={item.subName}
-                      onChange={(e) => handleItemChange(i, "subName", e.target.value)}
+                      onChange={(e) =>
+                        handleItemChange(i, "subName", e.target.value)
+                      }
                     />
                     <select
                       className="input"
                       value={item.valueType}
-                      onChange={(e) => handleItemChange(i, "valueType", e.target.value)}
+                      onChange={(e) =>
+                        handleItemChange(i, "valueType", e.target.value)
+                      }
                     >
                       <option value="">Type</option>
                       <option>Numeric</option>
@@ -210,25 +230,33 @@ export default function QCChecklists() {
                       placeholder="Min"
                       className="input"
                       value={item.min}
-                      onChange={(e) => handleItemChange(i, "min", e.target.value)}
+                      onChange={(e) =>
+                        handleItemChange(i, "min", e.target.value)
+                      }
                     />
                     <input
                       placeholder="Max"
                       className="input"
                       value={item.max}
-                      onChange={(e) => handleItemChange(i, "max", e.target.value)}
+                      onChange={(e) =>
+                        handleItemChange(i, "max", e.target.value)
+                      }
                     />
                     <input
                       placeholder="Same"
                       className="input"
                       value={item.same}
-                      onChange={(e) => handleItemChange(i, "same", e.target.value)}
+                      onChange={(e) =>
+                        handleItemChange(i, "same", e.target.value)
+                      }
                     />
                     <input
                       placeholder="Tool"
                       className="input"
                       value={item.tool}
-                      onChange={(e) => handleItemChange(i, "tool", e.target.value)}
+                      onChange={(e) =>
+                        handleItemChange(i, "tool", e.target.value)
+                      }
                     />
                     <button
                       onClick={() => removeItem(i)}

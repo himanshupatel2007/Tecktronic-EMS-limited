@@ -72,7 +72,7 @@ import Dispatch from "./components/dispatch/Dispatch";
 import QCChecklists from "./components/quality/QCChecklists";
 import QCChecklistHistory from "./components/quality/QCChecklistHistory";
 import QCChecklistgroups from "./components/quality/QCChecklistgroups";
-import ChecklistReport from "./components/quality/CkeclistReport";
+import ChecklistReceipt from "./components/quality/ChecklistReceipt";
 
 /* LOGS */
 import Transactions from "./components/details/Transactions";
@@ -83,6 +83,7 @@ import SoftwareTrail from "./components/details/SoftwareTrail";
 import CashBook from "./components/transactions/CashBook";
 import BankBook from "./components/transactions/BankBook";
 import ManageBanks from "./components/transactions/ManageBanks";
+
 
 export default function App() {
   return (
@@ -187,10 +188,8 @@ export default function App() {
             path="/quality/checklist-groups"
             element={<QCChecklistgroups />}
           />
-          <Route
-            path="/quality/checklist-report"
-            element={<ChecklistReport />}
-          />
+          <Route path="/quality/checklist-receipt" element={<ChecklistReceipt/>}/>
+          
 
           {/* LOGS */}
           <Route path="/logs/transactions" element={<Transactions />} />
