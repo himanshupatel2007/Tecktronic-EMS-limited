@@ -70,7 +70,9 @@ import Dispatch from "./components/dispatch/Dispatch";
 
 /* QUALITY */
 import QCChecklists from "./components/quality/QCChecklists";
-import QCHistory from "./components/quality/QCHistory";
+import QCChecklistHistory from "./components/quality/QCChecklistHistory";
+import QCChecklistgroups from "./components/quality/QCChecklistgroups";
+import ChecklistReport from "./components/quality/CkeclistReport";
 
 /* LOGS */
 import Transactions from "./components/details/Transactions";
@@ -86,14 +88,12 @@ export default function App() {
   return (
     <SidebarProvider>
       <Routes>
-
         {/* AUTH */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Register />} />
 
         {/* MAIN LAYOUT */}
         <Route element={<Layout />}>
-
           {/* DASHBOARD */}
           <Route path="/" element={<Overview />} />
 
@@ -106,22 +106,34 @@ export default function App() {
 
           {/* CUSTOMERS */}
           <Route path="/customers/list" element={<CustomersList />} />
-          <Route path="/customers/quotations" element={<CustomerQuotations />} />
+          <Route
+            path="/customers/quotations"
+            element={<CustomerQuotations />}
+          />
           <Route path="/customers/po" element={<CustomerPO />} />
           <Route path="/customers/invoicing" element={<CustomerInvoicing />} />
-          <Route path="/customers/returns-inwards" element={<CustomerReturns />} />
+          <Route
+            path="/customers/returns-inwards"
+            element={<CustomerReturns />}
+          />
           <Route path="/customers/summary" element={<CustomerSummary />} />
 
           {/* SUPPLIERS */}
           <Route path="/suppliers/list" element={<SuppliersList />} />
           <Route path="/suppliers/purchase-orders" element={<SupplierPO />} />
           <Route path="/suppliers/purchases" element={<Purchases />} />
-          <Route path="/suppliers/returns-outwards" element={<SupplierReturns />} />
+          <Route
+            path="/suppliers/returns-outwards"
+            element={<SupplierReturns />}
+          />
           <Route path="/suppliers/summary" element={<SupplierSummary />} />
 
           {/* GATE ENTRY */}
           <Route path="/gate-entry/grn" element={<GRN />} />
-          <Route path="/gate-entry/stock-allocation" element={<StockAllocation />} />
+          <Route
+            path="/gate-entry/stock-allocation"
+            element={<StockAllocation />}
+          />
           <Route path="/gate-entry/quality-control" element={<GateQC />} />
 
           {/* PRODUCTS */}
@@ -135,7 +147,10 @@ export default function App() {
 
           {/* INVENTORY */}
           <Route path="/inventory/manage" element={<InventoryManage />} />
-          <Route path="/inventory/production-stock" element={<ProductionStock />} />
+          <Route
+            path="/inventory/production-stock"
+            element={<ProductionStock />}
+          />
           <Route path="/inventory/raw-stock" element={<RawStock />} />
 
           {/* GODOWNS */}
@@ -146,19 +161,36 @@ export default function App() {
 
           {/* ASSEMBLY */}
           <Route path="/assembly-line/manage" element={<AssemblyManage />} />
-          <Route path="/assembly-line/production" element={<AssemblyProduction />} />
-          <Route path="/assembly-line/material-history" element={<MaterialHistory />} />
+          <Route
+            path="/assembly-line/production"
+            element={<AssemblyProduction />}
+          />
+          <Route
+            path="/assembly-line/material-history"
+            element={<MaterialHistory />}
+          />
 
           {/* PRODUCTION */}
           <Route path="/production" element={<Production />} />
-          <Route path="/production/calculator" element={<ProductionCalculator />} />
+          <Route
+            path="/production/calculator"
+            element={<ProductionCalculator />}
+          />
 
           {/* DISPATCH */}
           <Route path="/dispatch" element={<Dispatch />} />
 
           {/* QUALITY */}
           <Route path="/quality/checklists" element={<QCChecklists />} />
-          <Route path="/quality/history" element={<QCHistory />} />
+          <Route path="/quality/history" element={<QCChecklistHistory />} />
+          <Route
+            path="/quality/checklist-groups"
+            element={<QCChecklistgroups />}
+          />
+          <Route
+            path="/quality/checklist-report"
+            element={<ChecklistReport />}
+          />
 
           {/* LOGS */}
           <Route path="/logs/transactions" element={<Transactions />} />
@@ -169,12 +201,10 @@ export default function App() {
           <Route path="/transactions/cash-book" element={<CashBook />} />
           <Route path="/transactions/bank-book" element={<BankBook />} />
           <Route path="/transactions/manage-banks" element={<ManageBanks />} />
-
         </Route>
 
         {/* 404 */}
         <Route path="*" element={<NotFound />} />
-
       </Routes>
     </SidebarProvider>
   );

@@ -140,6 +140,7 @@ export default function Sidebar() {
       name: "Quality Control",
       icon: ShieldCheck,
       children: [
+        { name: "Checklist Groups", href: "/quality/checklist-groups" },
         { name: "Checklists", href: "/quality/checklists" },
         { name: "History", href: "/quality/history" },
       ],
