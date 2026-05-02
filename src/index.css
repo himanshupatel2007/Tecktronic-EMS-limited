@@ -1,16 +1,52 @@
 @import "tailwindcss";
 
 @custom-variant dark (&:is(.dark *));
-nav {
-  overflow-y: auto; /* keep scroll working */
 
-  /* Firefox */
-  scrollbar-width: none;
-
-  /* IE & Edge (old) */
-  -ms-overflow-style: none;
+/* 🔹 1. Hide scrollbar globally */
+html,
+body {
+  scrollbar-width: none; /* Firefox */
 }
 
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+}
+
+/* 🔹 2. NAV SCROLLBAR (VISIBLE + STYLED) */
+nav {
+  overflow-y: auto;
+
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: #3a3c44 transparent;
+}
+
+/* Dark mode (Firefox) */
+.dark nav {
+  scrollbar-color: #44a83e transparent;
+}
+
+/* 🔹 Chrome / Edge / Safari */
 nav::-webkit-scrollbar {
-  display: none; /* Chrome, Safari */
+  width: 5px;
+}
+
+nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+nav::-webkit-scrollbar-thumb {
+  background-color: #3a3c44;
+  border-radius: 20px;
+}
+
+/* Dark mode */
+.dark nav::-webkit-scrollbar-thumb {
+  background-color: #44a83e;
+}
+
+/* Hover effect */
+nav::-webkit-scrollbar-thumb:hover {
+  background-color: #44a83e;
 }
