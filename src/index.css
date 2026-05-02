@@ -1,3 +1,16 @@
 @import "tailwindcss";
 
 @custom-variant dark (&:is(.dark *));
+nav {
+  overflow-y: auto; /* keep scroll working */
+
+  /* Firefox */
+  scrollbar-width: none;
+
+  /* IE & Edge (old) */
+  -ms-overflow-style: none;
+}
+
+nav::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}

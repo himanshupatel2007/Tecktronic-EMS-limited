@@ -18,23 +18,23 @@ export default function QCChecklists() {
   const navigate = useNavigate();
 
   // ── ITEMS ─────────────────────────────
-  const addItem = () => {
-    setFormData((prev) => ({
-      ...prev,
-      items: [
-        ...prev.items,
-        {
-          name: "",
-          subName: "",
-          valueType: "",
-          min: "",
-          max: "",
-          same: "",
-          tool: "",
-        },
-      ],
-    }));
-  };
+ const addItem = () => {
+  setFormData((prev) => ({
+    ...prev,
+    items: [
+      ...prev.items,
+      {
+        name: "",
+        subName: "",
+        valueType: "Numeric",  // ← change this
+        min: "",
+        max: "",
+        same: "",
+        tool: "",
+      },
+    ],
+  }));
+};
 
   const handleItemChange = (index, key, value) => {
     const updated = [...formData.items];
@@ -224,7 +224,10 @@ export default function QCChecklists() {
                         {item.valueType !== "Character" && (
                           <InputField label="Max Value" icon={Hash} value={item.max} onChange={(v)=>handleItemChange(i,"max",v)} />
                         )}
-                        <InputField label="Same Value" icon={Hash} value={item.same} onChange={(v)=>handleItemChange(i,"same",v)} />
+                         {item.valueType !== "Numeric" && (
+                          <InputField label="Ideal Value" icon={Hash} value={item.same} onChange={(v)=>handleItemChange(i,"same",v)} />
+                        )}
+
                         <InputField label="Tool" icon={Package} value={item.tool} onChange={(v)=>handleItemChange(i,"tool",v)} />
 
                       </div>

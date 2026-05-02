@@ -209,9 +209,9 @@ export default function ChecklistReceipt() {
                   Sub Name
                 </td>
                 <td style={{ ...cell, textAlign: "center" }}>Type</td>
-                <td style={{ ...cell, textAlign: "center" }}>Min</td>
-                <td style={{ ...cell, textAlign: "center" }}>Max</td>
-                <td style={{ ...cell, textAlign: "center" }}>Same</td>
+                <td colSpan={3} style={{ ...cell, textAlign: "center" }}>
+                  Ideal Value
+                </td>
                 <td colSpan={2} style={{ ...cell, textAlign: "center" }}>
                   Tool
                 </td>
@@ -246,14 +246,10 @@ export default function ChecklistReceipt() {
                     <td style={{ ...cell, textAlign: "center" }}>
                       {item.valueType}
                     </td>
-                    <td style={{ ...cell, textAlign: "center" }}>
-                      {item.min || "-"}
-                    </td>
-                    <td style={{ ...cell, textAlign: "center" }}>
-                      {item.max || "-"}
-                    </td>
-                    <td style={{ ...cell, textAlign: "center" }}>
-                      {item.same || "-"}
+                    <td colSpan={3} style={{ ...cell, textAlign: "center" }}>
+                      {item.valueType === "Numeric"
+                        ? `${item.min || "-"} - ${item.max || "-"}`
+                        : item.same || "-"}
                     </td>
                     <td colSpan={2} style={{ ...cell, textAlign: "center" }}>
                       {item.tool}
