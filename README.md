@@ -58,27 +58,12 @@ Currently:
 ## 🛠️ Current Status
 
 * ✅ UI development in progress
-* ✅ State management implemented
 * ⏳ Backend integration ongoing
 
 ---
 
-## 📈 Future Improvements
 
-* Complete API integration
-* Add role-based access control
-* Improve performance and optimization
-* Add testing (unit & integration)
 
----
-
-## 👨‍💻 Author
-
-**Himanshu Patel**
-
-* Internship Project (ERP System)
-
----
 
 ## 📄 License
 
