@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { ArrowLeft, Plus, Trash2, CheckCircle, FileText, CreditCard, ChevronDown, X, Printer, Save } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, FileText, X, Printer, Save } from "lucide-react";
 import { createPortal } from "react-dom";
 
 // ── Product catalogue ─────────────────────────────────────────────────────────
@@ -26,6 +26,41 @@ const inputStyle = {
   width: "100%", padding: "9px 11px", borderRadius: 8,
   border: "1.5px solid #e2e8f0", fontSize: 13, outline: "none",
   boxSizing: "border-box", backgroundColor: "#f5f5f5", color: "#000", transition: "border-color 0.15s",
+};
+
+// ── FIX: Centralized style object S used in Payment Mode section ──────────────
+const S = {
+  card: {
+    borderRadius: 12,
+    border: "1px solid #e2e8f0",
+    overflow: "hidden",
+  },
+  cardHead: {
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+    padding: "14px 18px",
+    backgroundColor: "#f5f5f5",
+    borderBottom: "1px solid #e2e8f0",
+  },
+  dot: {
+    width: 8, height: 8, borderRadius: "50%", backgroundColor: "#44a83e",
+  },
+  cardTitle: {
+    fontSize: 13, fontWeight: 800, color: "#30333e", textTransform: "uppercase", letterSpacing: ".06em",
+  },
+  cardBody: {
+    padding: "18px 18px",
+  },
+  formLabel: {
+    display: "block", fontSize: 11, fontWeight: 700,
+    textTransform: "uppercase", letterSpacing: "0.06em", color: "#3a3c44",
+  },
+  formControl: {
+    width: "100%", padding: "9px 11px", borderRadius: 8,
+    border: "1.5px solid #e2e8f0", fontSize: 13, outline: "none",
+    boxSizing: "border-box", backgroundColor: "#f5f5f5", color: "#000",
+  },
 };
 
 // ── Invoice Preview Modal ─────────────────────────────────────────────────────
@@ -209,7 +244,7 @@ function InvoicePreviewModal({ invoice, onClose, onSave }) {
           )}
 
           {/* Items table */}
-          <div style={{ overflowX:"auto", padding:"0 0 0 0" }}>
+          <div style={{ overflowX:"auto" }}>
             <table style={{ width:"100%", borderCollapse:"collapse" }}>
               <thead>
                 <tr style={{ backgroundColor:"#30333e" }}>
@@ -385,7 +420,11 @@ export default function InvoiceForm({ sourcePO, onBack, onSubmit, existingInvoic
   const [dueDate,         setDueDate]         = useState(existingInvoice?.dueDate         || "");
   const [poRef,           setPoRef]           = useState(existingInvoice?.poRef           || sourcePO?.poNumber || "");
   const [poDate,          setPoDate]          = useState(existingInvoice?.poDate          || sourcePO?.poDate   || "");
+
+  // FIX: Split into two distinct state variables — "station" and "placeOfSupply"
   const [station,         setStation]         = useState(existingInvoice?.station         || "");
+  const [placeOfSupply,   setPlaceOfSupply]   = useState(existingInvoice?.placeOfSupply   || "");
+
   const [eWayBillNo,      setEWayBillNo]      = useState(existingInvoice?.eWayBillNo      || "");
   const [transport,       setTransport]       = useState(existingInvoice?.transport       || "");
   const [vehicleNo,       setVehicleNo]       = useState(existingInvoice?.vehicleNo       || "");
@@ -399,9 +438,9 @@ export default function InvoiceForm({ sourcePO, onBack, onSubmit, existingInvoic
   const [supplierCompany, setSupplierCompany] = useState(existingInvoice?.supplierCompany || "");
 
   // IRN
-  const [irn,   setIrn]   = useState(existingInvoice?.irn   || "");
-  const [ackNo, setAckNo] = useState(existingInvoice?.ackNo || "");
-  const [ackDate,setAckDate]=useState(existingInvoice?.ackDate|| "");
+  const [irn,    setIrn]    = useState(existingInvoice?.irn    || "");
+  const [ackNo,  setAckNo]  = useState(existingInvoice?.ackNo  || "");
+  const [ackDate,setAckDate]= useState(existingInvoice?.ackDate|| "");
 
   // Shipped-to (separate from billed-to)
   const [shipToName,    setShipToName]    = useState(existingInvoice?.shipToName    || "");
@@ -411,13 +450,18 @@ export default function InvoiceForm({ sourcePO, onBack, onSubmit, existingInvoic
   const [shipToGstin,   setShipToGstin]   = useState(existingInvoice?.shipToGstin   || "");
 
   // Bank details
-  const [bankName,   setBankName]   = useState(existingInvoice?.bankName   || "ICICI Bank");
-  const [accountNo,  setAccountNo]  = useState(existingInvoice?.accountNo  || "");
-  const [ifscCode,   setIfscCode]   = useState(existingInvoice?.ifscCode   || "");
+  const [bankName,  setBankName]  = useState(existingInvoice?.bankName  || "");
+  const [accountNo, setAccountNo] = useState(existingInvoice?.accountNo || "");
+  const [ifscCode,  setIfscCode]  = useState(existingInvoice?.ifscCode  || "");
 
   const [paymentTerms, setPaymentTerms] = useState(existingInvoice?.paymentTerms || sourcePO?.supplier?.paymentTerms || "");
-  const [paymentMode,  setPaymentMode]  = useState(existingInvoice?.paymentMode  || "");
   const [notes,        setNotes]        = useState(existingInvoice?.notes        || "");
+
+  // FIX: Declare payMode, chequeRef, utrRef states that were missing
+  const [payMode,    setPayMode]    = useState(existingInvoice?.payMode    || "");
+  const [chequeRef,  setChequeRef]  = useState(existingInvoice?.chequeRef  || "");
+  const [utrRef,     setUtrRef]     = useState(existingInvoice?.utrRef     || "");
+  const [transferMode, setTransferMode] = useState(existingInvoice?.transferMode || "NEFT");
 
   // Tax
   const [cgstPercent, setCgstPercent] = useState(existingInvoice?.cgstPercent || sourcePO?.cgstPercent || 0);
@@ -442,7 +486,7 @@ export default function InvoiceForm({ sourcePO, onBack, onSubmit, existingInvoic
     email:        initSup.email        || "",
   });
 
-  // Items — added packing field
+  // Items — with packing field
   const [items, setItems] = useState(
     existingInvoice?.items || sourcePO?.items ||
     [{ id:1, productName:"", poCode:"", hsn:"", packing:"", quantity:"", unitPrice:"", unit:"Pcs" }]
@@ -451,9 +495,9 @@ export default function InvoiceForm({ sourcePO, onBack, onSubmit, existingInvoic
   const [discountPercent, setDiscountPercent] = useState(existingInvoice?.discountPercent || sourcePO?.discountPercent || 0);
   const [discountAmount,  setDiscountAmount]  = useState(existingInvoice?.discountAmount  || sourcePO?.discountAmount  || 0);
 
-  const [errors,     setErrors]     = useState({});
-  const [showPreview,setShowPreview]= useState(false);
-  const [builtInvoice, setBuiltInvoice] = useState(null);
+  const [errors,      setErrors]      = useState({});
+  const [showPreview, setShowPreview] = useState(false);
+  const [builtInvoice,setBuiltInvoice]= useState(null);
 
   // helpers
   const handleAddItem    = () => setItems([...items, { id:Date.now(), productName:"", poCode:"", hsn:"", packing:"", quantity:"", unitPrice:"", unit:"Pcs" }]);
@@ -471,12 +515,15 @@ export default function InvoiceForm({ sourcePO, onBack, onSubmit, existingInvoic
   const finalTotal    = taxableAmount + totalTax;
 
   const buildInvoiceObject = () => ({
-    invoiceNumber, invoiceDate, dueDate, poRef, poDate, station, eWayBillNo,
-    transport, vehicleNo, reverseCharge, grNo, totalBox, totalWeight,
+    invoiceNumber, invoiceDate, dueDate, poRef, poDate,
+    station, placeOfSupply,
+    eWayBillNo, transport, vehicleNo, reverseCharge, grNo,
+    totalBox, totalWeight,
     supplierGstin, supplierCompany, irn, ackNo, ackDate,
     shipToName, shipToAddress, shipToCity, shipToPincode, shipToGstin,
     bankName, accountNo, ifscCode,
-    paymentTerms, paymentMode, notes,
+    paymentTerms, payMode, chequeRef, utrRef, transferMode,
+    notes,
     supplier: formData, items,
     discountPercent, discountAmount:finalDiscount, subtotal,
     cgst:cgstAmount, cgstPercent,
@@ -514,7 +561,6 @@ export default function InvoiceForm({ sourcePO, onBack, onSubmit, existingInvoic
 
   const fd = (field) => (val) => setFormData(p => ({ ...p, [field]:val }));
 
-  // compact field
   const Field = ({ label, children, col }) => (
     <div style={{ gridColumn: col }}>
       <label style={labelStyle}>{label}</label>
@@ -588,8 +634,9 @@ export default function InvoiceForm({ sourcePO, onBack, onSubmit, existingInvoic
               style={{ ...inputStyle, border:"1.5px solid "+(errors.dueDate?"#f87171":"#e2e8f0"), backgroundColor:errors.dueDate?"#fff5f5":"#f5f5f5" }} />
             {errors.dueDate && <p style={{ margin:"3px 0 0", fontSize:10, color:"#ef4444" }}>{errors.dueDate}</p>}
           </Field>
+          {/* FIX: Use dedicated placeOfSupply state, not station */}
           <Field label="Place of Supply">
-            {inp(station, setStation, { placeholder:"e.g. Madhya Pradesh (23)" })}
+            {inp(placeOfSupply, setPlaceOfSupply, { placeholder:"e.g. Madhya Pradesh (23)" })}
           </Field>
         </div>
         <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:14, marginBottom:14 }}>
@@ -619,6 +666,7 @@ export default function InvoiceForm({ sourcePO, onBack, onSubmit, existingInvoic
           <Field label="GR / RR No.">
             {inp(grNo, setGrNo, { placeholder:"GR/RR number" })}
           </Field>
+          {/* FIX: Use dedicated station state here */}
           <Field label="Station">
             {inp(station, setStation, { placeholder:"e.g. Food Park Maneri" })}
           </Field>
@@ -698,39 +746,169 @@ export default function InvoiceForm({ sourcePO, onBack, onSubmit, existingInvoic
           <Field label="Total Weight">
             {inp(totalWeight, setTotalWeight, { placeholder:"e.g. 5000 KGS" })}
           </Field>
-          <Field label="Payment Terms">
-            <select value={paymentTerms} onChange={(e)=>setPaymentTerms(e.target.value)} style={inputStyle}>
-              <option value="">-- Select --</option>
-              {["Net 7","Net 15","Net 30","Net 45","Net 60","Net 90"].map(t => <option key={t}>{t}</option>)}
-            </select>
-          </Field>
-          <Field label="Payment Mode">
-            <select value={paymentMode} onChange={(e)=>setPaymentMode(e.target.value)} style={inputStyle}>
-              <option value="">-- Select --</option>
-              <option value="Cash">Cash</option>
-              <option value="Credit">Credit</option>
-              <option value="Bank">Bank Transfer</option>
-            </select>
-          </Field>
         </div>
       </div>
 
-      {/* ── Section 6: Bank Details ── */}
+      {/* ── Section 6: PAYMENT MODE ── */}
       <div style={sec()}>
-        <SectionHead title="Bank Details" icon={CreditCard} />
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:14 }}>
-          <Field label="Bank Name">
-            <select value={bankName} onChange={(e)=>setBankName(e.target.value)} style={inputStyle}>
-              <option value="">-- Select Bank --</option>
-              {["ICICI Bank","HDFC Bank","State Bank of India (SBI)","Axis Bank","Kotak Mahindra Bank","Bank of Baroda","Punjab National Bank (PNB)","Yes Bank","IDFC First Bank","IndusInd Bank","Union Bank of India","Canara Bank","Bank of India","Indian Bank","Federal Bank"].map(b => <option key={b}>{b}</option>)}
-            </select>
-          </Field>
-          <Field label="Account No.">
-            {inp(accountNo, setAccountNo, { placeholder:"e.g. 113405002771", mono:true })}
-          </Field>
-          <Field label="IFSC Code">
-            {inp(ifscCode, setIfscCode, { placeholder:"e.g. ICIC0001134", mono:true })}
-          </Field>
+        <div style={S.card}>
+          <div style={S.cardHead}>
+            <div style={S.dot} />
+            <span style={S.cardTitle}>Payment Mode</span>
+          </div>
+
+          <div style={S.cardBody}>
+
+            {/* Payment Mode Dropdown */}
+            <div style={{ marginBottom: 24 }}>
+              <label style={S.formLabel}>Payment Mode *</label>
+              <select
+                value={payMode}
+                onChange={(e) => {
+                  setPayMode(e.target.value);
+                  // Reset payment-specific fields on mode change
+                  setBankName("");
+                  setChequeRef("");
+                  setUtrRef("");
+                  setPaymentTerms("");
+                }}
+                style={{ ...S.formControl, marginTop: 6, background: "#fff", cursor: "pointer", fontWeight: 600 }}
+              >
+                <option value="">-- Select Payment Mode --</option>
+                <option value="Cash">💵 Cash</option>
+                <option value="Credit">💳 Credit</option>
+                <option value="Bank">🏦 Bank Transfer</option>
+              </select>
+            </div>
+
+            {/* Cash Mode */}
+            {payMode === "Cash" && (
+              <div style={{ backgroundColor:"#f0fdf4", border:"1.5px solid #86efac", borderRadius:12, padding:"16px 18px", display:"flex", alignItems:"center", gap:12 }}>
+                <div style={{ fontSize:24 }}>✅</div>
+                <div>
+                  <div style={{ fontSize:14, fontWeight:700, color:"#166534" }}>Cash Payment Selected</div>
+                  <div style={{ fontSize:12, color:"#4b5563", marginTop:3 }}>Payment will be collected in cash.</div>
+                </div>
+              </div>
+            )}
+
+            {/* Credit Mode */}
+            {payMode === "Credit" && (
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))", gap:16 }}>
+                <div>
+                  <label style={S.formLabel}>Credit Terms</label>
+                  <select value={paymentTerms} onChange={(e) => setPaymentTerms(e.target.value)} style={{ ...S.formControl, marginTop:6 }}>
+                    <option value="">-- Select Terms --</option>
+                    <option value="Net 7">Net 7</option>
+                    <option value="Net 15">Net 15</option>
+                    <option value="Net 30">Net 30</option>
+                    <option value="Net 45">Net 45</option>
+                    <option value="Net 60">Net 60</option>
+                    <option value="Net 90">Net 90</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={S.formLabel}>Reference / Purchase Ref</label>
+                  <input type="text" value={poRef} onChange={(e) => setPoRef(e.target.value)}
+                    placeholder="e.g. PUR-2024-101"
+                    style={{ ...S.formControl, marginTop:6, fontFamily:"monospace" }} />
+                </div>
+                <div style={{ gridColumn:"1 / -1", background:"#fef9c3", border:"1.5px solid #fde047", borderRadius:10, padding:"14px 16px" }}>
+                  <div style={{ fontSize:13, fontWeight:700, color:"#92400e" }}>💳 Credit Terms Applied</div>
+                  <div style={{ marginTop:4, fontSize:12, color:"#a16207" }}>Payment is due according to selected credit terms.</div>
+                </div>
+              </div>
+            )}
+
+            {/* Bank Transfer Mode */}
+            {payMode === "Bank" && (
+              <div style={{ display:"flex", flexDirection:"column", gap:18 }}>
+                <div>
+                  <label style={S.formLabel}>Bank Name *</label>
+                  <select value={bankName} onChange={(e) => setBankName(e.target.value)}
+                    style={{ ...S.formControl, marginTop:6, borderColor:!bankName?"#fbbf24":"#e2e8f0", background:!bankName?"#fffbeb":"#fff" }}>
+                    <option value="">-- Select Bank --</option>
+                    <optgroup label="Public Sector Banks">
+                      <option>State Bank of India (SBI)</option>
+                      <option>Punjab National Bank</option>
+                      <option>Bank of Baroda</option>
+                      <option>Canara Bank</option>
+                      <option>Union Bank of India</option>
+                    </optgroup>
+                    <optgroup label="Private Sector Banks">
+                      <option>HDFC Bank</option>
+                      <option>ICICI Bank</option>
+                      <option>Axis Bank</option>
+                      <option>Kotak Mahindra Bank</option>
+                      <option>IndusInd Bank</option>
+                    </optgroup>
+                    <optgroup label="Small Finance Banks">
+                      <option>AU Small Finance Bank</option>
+                      <option>Equitas Small Finance Bank</option>
+                    </optgroup>
+                  </select>
+                  {!bankName && <div style={{ marginTop:5, fontSize:11, color:"#f59e0b" }}>Please select a bank</div>}
+                </div>
+
+                {bankName && (
+                  <>
+                    <div style={{ display:"flex", alignItems:"center", gap:12, padding:"14px 16px", background:"#eff6ff", border:"1.5px solid #bfdbfe", borderRadius:12 }}>
+                      <div style={{ fontSize:24 }}>🏦</div>
+                      <div>
+                        <div style={{ fontSize:14, fontWeight:700, color:"#1d4ed8" }}>{bankName}</div>
+                        <div style={{ marginTop:2, fontSize:11, color:"#3b82f6" }}>Selected for purchase payment</div>
+                      </div>
+                    </div>
+
+                    <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))", gap:16 }}>
+                      <div>
+                        <label style={S.formLabel}>Transfer Mode</label>
+                        <select value={transferMode} onChange={(e) => setTransferMode(e.target.value)} style={{ ...S.formControl, marginTop:6 }}>
+                          <option>NEFT</option>
+                          <option>RTGS</option>
+                          <option>IMPS</option>
+                          <option>UPI</option>
+                          <option>Cheque</option>
+                          <option>DD</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label style={S.formLabel}>UTR / Reference No.</label>
+                        <input type="text" value={utrRef} onChange={(e) => setUtrRef(e.target.value)}
+                          placeholder="e.g. SBIN00012345"
+                          style={{ ...S.formControl, marginTop:6, fontFamily:"monospace" }} />
+                      </div>
+                      <div>
+                        <label style={S.formLabel}>Cheque / DD No.</label>
+                        <input type="text" value={chequeRef} onChange={(e) => setChequeRef(e.target.value)}
+                          placeholder="e.g. 123456"
+                          style={{ ...S.formControl, marginTop:6, fontFamily:"monospace" }} />
+                      </div>
+                      <div>
+                        <label style={S.formLabel}>Account No.</label>
+                        <input type="text" value={accountNo} onChange={(e) => setAccountNo(e.target.value)}
+                          placeholder="e.g. 001234567890"
+                          style={{ ...S.formControl, marginTop:6, fontFamily:"monospace" }} />
+                      </div>
+                      <div>
+                        <label style={S.formLabel}>IFSC Code</label>
+                        <input type="text" value={ifscCode} onChange={(e) => setIfscCode(e.target.value)}
+                          placeholder="e.g. ICIC0001234"
+                          style={{ ...S.formControl, marginTop:6, fontFamily:"monospace" }} />
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* No Selection */}
+            {!payMode && (
+              <div style={{ textAlign:"center", padding:"22px 18px", borderRadius:12, background:"#f8fafc", border:"1.5px dashed #cbd5e1" }}>
+                <div style={{ fontSize:13, color:"#94a3b8" }}>Select a payment mode to continue</div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -831,7 +1009,7 @@ export default function InvoiceForm({ sourcePO, onBack, onSubmit, existingInvoic
         </div>
 
         {/* Summary */}
-        <div style={{borderRadius:12, border:"2px solid #86efac", padding:20 }}>
+        <div style={{ borderRadius:12, border:"2px solid #86efac", padding:20 }}>
           <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:16 }}>
             <FileText size={15} style={{ color:"#44a83e" }} />
             <h3 style={{ margin:0, fontSize:14, fontWeight:800, color:"#1a2a1a" }}>Invoice Summary</h3>
