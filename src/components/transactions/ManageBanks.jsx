@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import CreateForm from "../CreateForm";
-import CreateTable from "../CreateTable";
+import ExportTable from "../ExportTable";
 import {
   Plus,
   Building2,
@@ -9,110 +8,506 @@ import {
   CreditCard,
   Eye,
   Trash2,
+  Upload,
+  Filter,
+  ChevronLeft,
+  ChevronRight,
+  Boxes,
 } from "lucide-react";
+
+const ITEMS_PER_PAGE = 10;
 
 export default function ManageBanks() {
   const [activeForm, setActiveForm] = useState(false);
+
   const [banks, setBanks] = useState([]);
+
+  const [formData, setFormData] = useState({
+    name: "",
+    ifsc: "",
+    accountType: "Savings",
+    accountNumber: "",
+  });
+
+  const [filters, setFilters] = useState({});
+  const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
   const navigate = useNavigate();
 
   const handleAdd = (data) => {
-    setBanks((prev) => [{ ...data, id: Date.now() }, ...prev]);
+    setBanks((prev) => [
+      { ...data, id: Date.now() },
+      ...prev,
+    ]);
+
     setActiveForm(false);
+
+    setFormData({
+      name: "",
+      ifsc: "",
+      accountType: "Savings",
+      accountNumber: "",
+    });
   };
 
   const handleDelete = (id) => {
-    setBanks((prev) => prev.filter((b) => b.id !== id));
+    setBanks((prev) =>
+      prev.filter((b) => b.id !== id),
+    );
   };
 
-  const initialState = {
-    name: "",
-    ifsc: "",
-    accountType: "",
-    accountNumber: "",
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
-  const fields = [
-    {
-      name: "name",
-      label: "Bank Name",
-      icon: Building2,
-      type: "text",
-    },
-    {
-      name: "ifsc",
-      label: "IFSC Code",
-      icon: Hash,
-      type: "text",
-    },
-    {
-      name: "accountType",
-      label: "Account Type",
-      icon: CreditCard,
-      type: "select",
-      options: ["Savings", "Current"],
-    },
-    {
-      name: "accountNumber",
-      label: "Account Number",
-      icon: CreditCard,
-      type: "text",
-    },
-  ];
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    handleAdd(formData);
+  };
 
-  const columns = [
-    { label: "Bank Name", key: "name" },
-    { label: "IFSC", key: "ifsc" },
-    { label: "Type", key: "accountType" },
-    { label: "Account No.", key: "accountNumber" },
-  ];
+  const handleImport = (e) => {
+    const file = e.target.files[0];
 
-  const actions = [
-    {
-      label: "View",
-      icon: Eye,
-      onClick: (row) =>
-        navigate(`/transactions/bank-book?bank=${row.name}`),
-    },
-    {
-      label: "Delete",
-      icon: Trash2,
-      onClick: (row) => handleDelete(row.id),
-      className: "border-red-200 text-red-500 hover:bg-red-50",
-    },
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = (event) => {
+      const text = event.target.result;
+
+      const rows = text
+        .split("\n")
+        .map((r) => r.split(","));
+
+      const headers = rows[0];
+
+      const imported = rows.slice(1).map((row) => {
+        const obj = {};
+
+        headers.forEach((h, i) => {
+          obj[h.trim()] = row[i]?.trim();
+        });
+
+        return {
+          ...obj,
+          id: Date.now() + Math.random(),
+        };
+      });
+
+      setBanks((prev) => [
+        ...imported,
+        ...prev,
+      ]);
+    };
+
+    reader.readAsText(file);
+  };
+
+  const filteredBanks = banks
+    .filter((item) => {
+      return (
+        !filters.accountType ||
+        item.accountType === filters.accountType
+      );
+    })
+    .filter((item) => {
+      if (!search) return true;
+
+      return Object.values(item).some((val) =>
+        String(val)
+          .toLowerCase()
+          .includes(search.toLowerCase()),
+      );
+    });
+
+  const totalPages = Math.ceil(
+    filteredBanks.length / ITEMS_PER_PAGE,
+  );
+
+  const paginated = filteredBanks.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE,
+  );
+
+  const uniqueValues = (key) => [
+    ...new Set(
+      banks.map((d) => d[key]).filter(Boolean),
+    ),
   ];
 
   return (
     <>
-      <div className="flex gap-3 mb-5">
+      {/* TOP BUTTON */}
+      <div className="mb-5 flex gap-3">
         <button
           onClick={() => setActiveForm(true)}
-          className="flex items-center gap-2 bg-[#44a83e] px-5 py-2 rounded-xl text-white"
+          className="flex items-center gap-2 rounded-xl bg-[#44a83e] px-5 py-2 text-white"
         >
-          <Plus className="h-4 w-4" /> Add Bank
+          <Plus className="h-4 w-4" />
+          Add Bank
         </button>
       </div>
 
       <div className="space-y-8">
+        {/* FORM */}
         {activeForm && (
-          <CreateForm
-            title="Add Bank"
-            subtitle="Manage your bank accounts"
-            fields={fields}
-            initialState={initialState}
-            onSubmit={handleAdd}
-            onImport={(data) => data.forEach(handleAdd)}
-          />
+          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-[#162033] dark:bg-[#0d1528]">
+            {/* HEADER */}
+            <div
+              className="flex items-center justify-between border-b border-slate-200 px-6 py-5 dark:border-[#162033]"
+              style={{ backgroundColor: "#3a3c44" }}
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/10">
+                  <Plus className="h-5 w-5 text-white" />
+                </div>
+
+                <div>
+                  <h2 className="text-lg font-semibold text-white">
+                    Add Bank
+                  </h2>
+
+                  <p className="text-xs text-white/60">
+                    Manage your bank accounts
+                  </p>
+                </div>
+              </div>
+
+              {/* IMPORT */}
+              <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-white/20 px-3 py-2 text-xs font-medium text-white hover:bg-white/10">
+                <Upload className="h-4 w-4" />
+                Import
+
+                <input
+                  type="file"
+                  accept=".csv"
+                  onChange={handleImport}
+                  className="hidden"
+                />
+              </label>
+            </div>
+
+            {/* FORM BODY */}
+            <form onSubmit={handleSubmit}>
+              <div className="grid grid-cols-1 gap-5 p-6 md:grid-cols-2">
+                {/* BANK NAME */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    Bank Name
+                  </label>
+
+                  <div className="relative">
+                    <Building2 className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-11 pr-4 text-sm outline-none focus:border-[#44a83e] dark:border-[#1b2740] dark:bg-[#11182b]"
+                    />
+                  </div>
+                </div>
+
+                {/* IFSC */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    IFSC Code
+                  </label>
+
+                  <div className="relative">
+                    <Hash className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+
+                    <input
+                      type="text"
+                      name="ifsc"
+                      value={formData.ifsc}
+                      onChange={handleChange}
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-11 pr-4 text-sm outline-none focus:border-[#44a83e] dark:border-[#1b2740] dark:bg-[#11182b]"
+                    />
+                  </div>
+                </div>
+
+                {/* ACCOUNT TYPE */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    Account Type
+                  </label>
+
+                  <div className="relative">
+                    <CreditCard className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+
+                    <select
+                      name="accountType"
+                      value={formData.accountType}
+                      onChange={handleChange}
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-11 pr-4 text-sm outline-none focus:border-[#44a83e] dark:border-[#1b2740] dark:bg-[#11182b]"
+                    >
+                      <option value="Savings">
+                        Savings
+                      </option>
+
+                      <option value="Current">
+                        Current
+                      </option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* ACCOUNT NUMBER */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    Account Number
+                  </label>
+
+                  <div className="relative">
+                    <CreditCard className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+
+                    <input
+                      type="text"
+                      name="accountNumber"
+                      value={formData.accountNumber}
+                      onChange={handleChange}
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-11 pr-4 text-sm outline-none focus:border-[#44a83e] dark:border-[#1b2740] dark:bg-[#11182b]"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* SUBMIT */}
+              <div className="px-6 pb-6">
+                <button
+                  type="submit"
+                  className="flex items-center gap-2 rounded-xl bg-[#44a83e] px-6 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-[#3c9437]"
+                >
+                  <Plus className="h-4 w-4" />
+                  Create
+                </button>
+              </div>
+            </form>
+          </div>
         )}
 
-        <CreateTable
-          title="Manage Banks"
-          data={banks}
-          columns={columns}
-          filtersConfig={["accountType"]}
-          actions={actions}
-        />
+        {/* TABLE */}
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-[#162033] dark:bg-[#0d1528]">
+         {/* HEADER */}
+<div
+  className="border-b border-slate-200 px-6 py-5 dark:border-[#162033]"
+  style={{ backgroundColor: "#3a3c44" }}
+>
+  <div className="flex flex-wrap items-center justify-between gap-3">
+
+    <div className="flex items-center gap-3">
+      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10">
+        <Boxes className="h-5 w-5 text-white" />
+      </div>
+
+      <div>
+        <h2 className="text-lg font-semibold text-white">
+          Manage Banks
+        </h2>
+
+        <p className="text-xs text-white/60">
+          {filteredBanks.length} items
+        </p>
+      </div>
+    </div>
+
+    {/* RIGHT SIDE */}
+    <div className="ml-auto flex flex-wrap items-center gap-2">
+
+      {/* SEARCH */}
+      <input
+        type="text"
+        placeholder="Search..."
+        value={search}
+        onChange={(e) => {
+          setSearch(e.target.value);
+          setCurrentPage(1);
+        }}
+        className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs outline-none dark:border-[#1b2740] dark:bg-[#0d1528]"
+      />
+
+      {/* EXPORT */}
+      <ExportTable
+        title="Manage Banks"
+        columns={[
+          {
+            label: "Bank Name",
+            key: "name",
+          },
+          {
+            label: "IFSC",
+            key: "ifsc",
+          },
+          {
+            label: "Account Type",
+            key: "accountType",
+          },
+          {
+            label: "Account Number",
+            key: "accountNumber",
+          },
+        ]}
+        data={filteredBanks}
+      />
+
+    </div>
+  </div>
+</div>
+
+          {/* FILTERS */}
+          <div className="flex flex-wrap items-center gap-3 border-b border-slate-100 bg-slate-50 px-6 py-3 dark:border-[#162033] dark:bg-[#0d1f38]">
+            <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <Filter className="h-3.5 w-3.5" />
+              Filter
+            </div>
+
+            <select
+              value={filters.accountType || ""}
+              onChange={(e) => {
+                setFilters({
+                  ...filters,
+                  accountType: e.target.value,
+                });
+
+                setCurrentPage(1);
+              }}
+              className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs outline-none dark:border-[#1b2740] dark:bg-[#0d1528]"
+            >
+              <option value="">
+                All account types
+              </option>
+
+              {uniqueValues("accountType").map(
+                (val) => (
+                  <option key={val}>
+                    {val}
+                  </option>
+                ),
+              )}
+            </select>
+          </div>
+
+          {/* TABLE */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-slate-100 dark:border-[#162033]">
+                  {[
+                    "Bank Name",
+                    "IFSC",
+                    "Type",
+                    "Account No.",
+                    "Actions",
+                  ].map((head) => (
+                    <th
+                      key={head}
+                      className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-400"
+                    >
+                      {head}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+
+              <tbody className="divide-y divide-slate-100 dark:divide-[#162033]">
+                {paginated.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={5}
+                      className="py-10 text-center text-sm text-slate-400"
+                    >
+                      No data found
+                    </td>
+                  </tr>
+                ) : (
+                  paginated.map((row) => (
+                    <tr
+                      key={row.id}
+                      className="hover:bg-slate-50 dark:hover:bg-[#11182b]"
+                    >
+                      <td className="px-6 py-4">
+                        {row.name}
+                      </td>
+
+                      <td className="px-6 py-4">
+                        {row.ifsc}
+                      </td>
+
+                      <td className="px-6 py-4">
+                        {row.accountType}
+                      </td>
+
+                      <td className="px-6 py-4">
+                        {row.accountNumber}
+                      </td>
+
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() =>
+                              navigate(
+                                `/transactions/bank-book?bank=${row.name}`,
+                              )
+                            }
+                            className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100"
+                          >
+                            <Eye className="h-3.5 w-3.5" />
+                            View
+                          </button>
+
+                          <button
+                            onClick={() =>
+                              handleDelete(row.id)
+                            }
+                            className="flex items-center gap-1.5 rounded-lg border border-red-200 px-3 py-1.5 text-xs font-medium text-red-500 hover:bg-red-50"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* PAGINATION */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between border-t border-slate-100 px-6 py-4 dark:border-[#162033]">
+              <button
+                onClick={() =>
+                  setCurrentPage((p) =>
+                    Math.max(p - 1, 1),
+                  )
+                }
+              >
+                <ChevronLeft />
+              </button>
+
+              <span>
+                {currentPage} / {totalPages}
+              </span>
+
+              <button
+                onClick={() =>
+                  setCurrentPage((p) =>
+                    Math.min(p + 1, totalPages),
+                  )
+                }
+              >
+                <ChevronRight />
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </>
   );
