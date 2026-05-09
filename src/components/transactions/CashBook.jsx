@@ -11,15 +11,41 @@ import {
   ChevronRight,
   Boxes,
 } from "lucide-react";
+
 import ExportTable from "../ExportTable";
 
+/* =========================================================
+   CONSTANTS
+========================================================= */
 const ITEMS_PER_PAGE = 10;
+const date = Date.now()
 
+/* =========================================================
+   MAIN COMPONENT
+========================================================= */
 export default function CashBook() {
-  const [activeForm, setActiveForm] = useState(false);
+  /* =========================================================
+     STATE
+  ========================================================= */
 
+  // Show / hide transaction form
+  const [showForm, setShowForm] = useState(false);
+
+  // All transactions
   const [transactions, setTransactions] = useState([]);
 
+  // Search text
+  const [searchText, setSearchText] = useState("");
+
+  // Current page number
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Filter values
+  const [filters, setFilters] = useState({
+    type: "",
+  });
+
+  // Form data
   const [formData, setFormData] = useState({
     date: "",
     particular: "",
@@ -27,18 +53,44 @@ export default function CashBook() {
     type: "entry",
   });
 
-  const [filters, setFilters] = useState({});
-  const [search, setSearch] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+  /* =========================================================
+     HANDLE INPUT CHANGE
+  ========================================================= */
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
 
-  const handleAdd = (data) => {
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  /* =========================================================
+     ADD TRANSACTION
+  ========================================================= */
+  
+  const addTransaction = (transactionData) => {
+    const newTransaction = {
+      ...transactionData,
+      id: date,
+    };
+
     setTransactions((prev) => [
-      { ...data, id: Date.now() },
+      newTransaction,
       ...prev,
     ]);
 
-    setActiveForm(false);
+    // Reset form
+    resetForm();
 
+    // Close form
+    setShowForm(false);
+  };
+
+  /* =========================================================
+     RESET FORM
+  ========================================================= */
+  const resetForm = () => {
     setFormData({
       date: "",
       particular: "",
@@ -47,55 +99,67 @@ export default function CashBook() {
     });
   };
 
-  const handleDelete = (id) => {
-    setTransactions((prev) =>
-      prev.filter((t) => t.id !== id),
-    );
+  /* =========================================================
+     FORM SUBMIT
+  ========================================================= */
+  const handleSubmit = (event) => {
+    event.preventDefault();
+
+    addTransaction(formData);
   };
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+  /* =========================================================
+     DELETE TRANSACTION
+  ========================================================= */
+  const deleteTransaction = (id) => {
+    const updatedTransactions =
+      transactions.filter(
+        (transaction) => transaction.id !== id,
+      );
+
+    setTransactions(updatedTransactions);
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    handleAdd(formData);
-  };
-
-  const handleImport = (e) => {
-    const file = e.target.files[0];
+  /* =========================================================
+     IMPORT CSV
+  ========================================================= */
+  const handleImport = (event) => {
+    const file = event.target.files[0];
 
     if (!file) return;
 
     const reader = new FileReader();
 
-    reader.onload = (event) => {
-      const text = event.target.result;
+    reader.onload = (e) => {
+      const csvText = e.target.result;
 
-      const rows = text
+      // Convert CSV into rows
+      const rows = csvText
         .split("\n")
-        .map((r) => r.split(","));
+        .map((row) => row.split(","));
 
+      // First row = headers
       const headers = rows[0];
 
-      const imported = rows.slice(1).map((row) => {
-        const obj = {};
+      // Remaining rows = data
+      const importedTransactions = rows
+        .slice(1)
+        .map((row) => {
+          const transaction = {};
 
-        headers.forEach((h, i) => {
-          obj[h.trim()] = row[i]?.trim();
+          headers.forEach((header, index) => {
+            transaction[header.trim()] =
+              row[index]?.trim();
+          });
+
+          return {
+            ...transaction,
+            id: Date.now() + Math.random(),
+          };
         });
 
-        return {
-          ...obj,
-          id: Date.now() + Math.random(),
-        };
-      });
-
       setTransactions((prev) => [
-        ...imported,
+        ...importedTransactions,
         ...prev,
       ]);
     };
@@ -103,46 +167,71 @@ export default function CashBook() {
     reader.readAsText(file);
   };
 
+  /* =========================================================
+     FILTER TRANSACTIONS
+  ========================================================= */
   const filteredTransactions = transactions
-    .filter((item) => {
-      return (
-        !filters.type ||
-        item.type === filters.type
-      );
-    })
-    .filter((item) => {
-      if (!search) return true;
+    .filter((transaction) => {
+      // Filter by type
+      if (
+        filters.type &&
+        transaction.type !== filters.type
+      ) {
+        return false;
+      }
 
-      return Object.values(item).some((val) =>
-        String(val)
-          .toLowerCase()
-          .includes(search.toLowerCase()),
+      return true;
+    })
+    .filter((transaction) => {
+      // Search filter
+      if (!searchText) return true;
+
+      return Object.values(transaction).some(
+        (value) =>
+          String(value)
+            .toLowerCase()
+            .includes(searchText.toLowerCase()),
       );
     });
 
+  /* =========================================================
+     PAGINATION
+  ========================================================= */
   const totalPages = Math.ceil(
-    filteredTransactions.length / ITEMS_PER_PAGE,
+    filteredTransactions.length /
+      ITEMS_PER_PAGE,
   );
 
-  const paginated = filteredTransactions.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE,
-  );
+  const paginatedTransactions =
+    filteredTransactions.slice(
+      (currentPage - 1) * ITEMS_PER_PAGE,
+      currentPage * ITEMS_PER_PAGE,
+    );
 
-  const uniqueValues = (key) => [
-    ...new Set(
-      transactions
-        .map((d) => d[key])
-        .filter(Boolean),
-    ),
-  ];
+  /* =========================================================
+     GET UNIQUE VALUES FOR FILTERS
+  ========================================================= */
+  const getUniqueValues = (key) => {
+    return [
+      ...new Set(
+        transactions
+          .map((item) => item[key])
+          .filter(Boolean),
+      ),
+    ];
+  };
 
+  /* =========================================================
+     UI
+  ========================================================= */
   return (
     <>
-      {/* TOP BUTTON */}
+      {/* =====================================================
+          TOP BUTTON
+      ====================================================== */}
       <div className="mb-5 flex gap-3">
         <button
-          onClick={() => setActiveForm(true)}
+          onClick={() => setShowForm(true)}
           className="flex items-center gap-2 rounded-xl bg-[#44a83e] px-5 py-2 text-white"
         >
           <Plus className="h-4 w-4" />
@@ -151,14 +240,21 @@ export default function CashBook() {
       </div>
 
       <div className="space-y-8">
-        {/* FORM */}
-        {activeForm && (
+
+        {/* =====================================================
+            FORM SECTION
+        ====================================================== */}
+        {showForm && (
           <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-[#162033] dark:bg-[#0d1528]">
+
             {/* HEADER */}
             <div
               className="flex items-center justify-between border-b border-slate-200 px-6 py-5 dark:border-[#162033]"
-              style={{ backgroundColor: "#3a3c44" }}
+              style={{
+                backgroundColor: "#3a3c44",
+              }}
             >
+              {/* LEFT SIDE */}
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/10">
                   <Plus className="h-5 w-5 text-white" />
@@ -175,9 +271,10 @@ export default function CashBook() {
                 </div>
               </div>
 
-              {/* IMPORT */}
+              {/* IMPORT BUTTON */}
               <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-white/20 px-3 py-2 text-xs font-medium text-white hover:bg-white/10">
                 <Upload className="h-4 w-4" />
+
                 Import
 
                 <input
@@ -189,96 +286,85 @@ export default function CashBook() {
               </label>
             </div>
 
-            {/* FORM BODY */}
+            {/* FORM */}
             <form onSubmit={handleSubmit}>
               <div className="grid grid-cols-1 gap-5 p-6 md:grid-cols-2">
+
                 {/* DATE */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                    Date
-                  </label>
-
-                  <div className="relative">
+                <InputField
+                  label="Date"
+                  icon={
                     <Calendar className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-
-                    <input
-                      type="date"
-                      name="date"
-                      value={formData.date}
-                      onChange={handleChange}
-                      className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-11 pr-4 text-sm outline-none focus:border-[#44a83e] dark:border-[#1b2740] dark:bg-[#11182b]"
-                    />
-                  </div>
-                </div>
+                  }
+                >
+                  <input
+                    type="date"
+                    name="date"
+                    value={formData.date}
+                    onChange={handleInputChange}
+                    className={inputClass}
+                  />
+                </InputField>
 
                 {/* PARTICULAR */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                    Particular
-                  </label>
-
-                  <div className="relative">
+                <InputField
+                  label="Particular"
+                  icon={
                     <FileText className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-
-                    <input
-                      type="text"
-                      name="particular"
-                      value={formData.particular}
-                      onChange={handleChange}
-                      placeholder="Details"
-                      className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-11 pr-4 text-sm outline-none focus:border-[#44a83e] dark:border-[#1b2740] dark:bg-[#11182b]"
-                    />
-                  </div>
-                </div>
+                  }
+                >
+                  <input
+                    type="text"
+                    name="particular"
+                    placeholder="Details"
+                    value={formData.particular}
+                    onChange={handleInputChange}
+                    className={inputClass}
+                  />
+                </InputField>
 
                 {/* AMOUNT */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                    Amount
-                  </label>
-
-                  <div className="relative">
+                <InputField
+                  label="Amount"
+                  icon={
                     <IndianRupee className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-
-                    <input
-                      type="number"
-                      name="amount"
-                      value={formData.amount}
-                      onChange={handleChange}
-                      placeholder="1000"
-                      className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-11 pr-4 text-sm outline-none focus:border-[#44a83e] dark:border-[#1b2740] dark:bg-[#11182b]"
-                    />
-                  </div>
-                </div>
+                  }
+                >
+                  <input
+                    type="number"
+                    name="amount"
+                    placeholder="1000"
+                    value={formData.amount}
+                    onChange={handleInputChange}
+                    className={inputClass}
+                  />
+                </InputField>
 
                 {/* TYPE */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                    Type
-                  </label>
-
-                  <div className="relative">
+                <InputField
+                  label="Type"
+                  icon={
                     <FileText className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  }
+                >
+                  <select
+                    name="type"
+                    value={formData.type}
+                    onChange={handleInputChange}
+                    className={inputClass}
+                  >
+                    <option value="entry">
+                      entry
+                    </option>
 
-                    <select
-                      name="type"
-                      value={formData.type}
-                      onChange={handleChange}
-                      className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-11 pr-4 text-sm outline-none focus:border-[#44a83e] dark:border-[#1b2740] dark:bg-[#11182b]"
-                    >
-                      <option value="entry">
-                        entry
-                      </option>
-
-                      <option value="drawing">
-                        drawing
-                      </option>
-                    </select>
-                  </div>
-                </div>
+                    <option value="drawing">
+                      drawing
+                    </option>
+                  </select>
+                </InputField>
               </div>
 
-              {/* SUBMIT */}
+              {/* SUBMIT BUTTON */}
               <div className="px-6 pb-6">
                 <button
                   type="submit"
@@ -292,83 +378,95 @@ export default function CashBook() {
           </div>
         )}
 
-        {/* TABLE */}
+        {/* =====================================================
+            TABLE SECTION
+        ====================================================== */}
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-[#162033] dark:bg-[#0d1528]">
-         {/* HEADER */}
-<div
-  className="border-b border-slate-200 px-6 py-5 dark:border-[#162033]"
-  style={{ backgroundColor: "#3a3c44" }}
->
-  <div className="flex flex-wrap items-center justify-between gap-3">
 
-    <div className="flex items-center gap-3">
-      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10">
-        <Boxes className="h-5 w-5 text-white" />
-      </div>
+          {/* HEADER */}
+          <div
+            className="border-b border-slate-200 px-6 py-5 dark:border-[#162033]"
+            style={{
+              backgroundColor: "#3a3c44",
+            }}
+          >
+            <div className="flex flex-wrap items-center justify-between gap-3">
 
-      <div>
-        <h2 className="text-lg font-semibold text-white">
-          Cash Book
-        </h2>
+              {/* LEFT SIDE */}
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10">
+                  <Boxes className="h-5 w-5 text-white" />
+                </div>
 
-        <p className="text-xs text-white/60">
-          {filteredTransactions.length} items
-        </p>
-      </div>
-    </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-white">
+                    Cash Book
+                  </h2>
 
-    {/* RIGHT SIDE */}
-    <div className="ml-auto flex flex-wrap items-center gap-2">
+                  <p className="text-xs text-white/60">
+                    {
+                      filteredTransactions.length
+                    }{" "}
+                    items
+                  </p>
+                </div>
+              </div>
 
-      {/* SEARCH */}
-      <input
-        type="text"
-        placeholder="Search..."
-        value={search}
-        onChange={(e) => {
-          setSearch(e.target.value);
-          setCurrentPage(1);
-        }}
-        className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs outline-none dark:border-[#1b2740] dark:bg-[#0d1528]"
-      />
+              {/* RIGHT SIDE */}
+              <div className="ml-auto flex flex-wrap items-center gap-2">
 
-      {/* EXPORT */}
-      <ExportTable
-        title="Cash Book"
-        columns={[
-          {
-            label: "Date",
-            key: "date",
-          },
-          {
-            label: "Particular",
-            key: "particular",
-          },
-          {
-            label: "Amount",
-            key: "amount",
-          },
-          {
-            label: "Type",
-            key: "type",
-          },
-        ]}
-        data={filteredTransactions}
-      />
+                {/* SEARCH */}
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  value={searchText}
+                  onChange={(e) => {
+                    setSearchText(
+                      e.target.value,
+                    );
 
-    </div>
-  </div>
-</div>
+                    setCurrentPage(1);
+                  }}
+                  className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs outline-none dark:border-[#1b2740] dark:bg-[#0d1528]"
+                />
+
+                {/* EXPORT */}
+                <ExportTable
+                  title="Cash Book"
+                  columns={[
+                    {
+                      label: "Date",
+                      key: "date",
+                    },
+                    {
+                      label: "Particular",
+                      key: "particular",
+                    },
+                    {
+                      label: "Amount",
+                      key: "amount",
+                    },
+                    {
+                      label: "Type",
+                      key: "type",
+                    },
+                  ]}
+                  data={filteredTransactions}
+                />
+              </div>
+            </div>
+          </div>
 
           {/* FILTERS */}
           <div className="flex flex-wrap items-center gap-3 border-b border-slate-100 bg-slate-50 px-6 py-3 dark:border-[#162033] dark:bg-[#0d1f38]">
+
             <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-slate-400">
               <Filter className="h-3.5 w-3.5" />
               Filter
             </div>
 
             <select
-              value={filters.type || ""}
+              value={filters.type}
               onChange={(e) => {
                 setFilters({
                   ...filters,
@@ -383,17 +481,24 @@ export default function CashBook() {
                 All type
               </option>
 
-              {uniqueValues("type").map((val) => (
-                <option key={val}>
-                  {val}
-                </option>
-              ))}
+              {getUniqueValues("type").map(
+                (value) => (
+                  <option
+                    key={value}
+                    value={value}
+                  >
+                    {value}
+                  </option>
+                ),
+              )}
             </select>
           </div>
 
           {/* TABLE */}
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
+
+              {/* TABLE HEADER */}
               <thead>
                 <tr className="border-b border-slate-100 dark:border-[#162033]">
                   {[
@@ -402,19 +507,23 @@ export default function CashBook() {
                     "Amount",
                     "Type",
                     "Actions",
-                  ].map((head) => (
+                  ].map((heading) => (
                     <th
-                      key={head}
+                      key={heading}
                       className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-400"
                     >
-                      {head}
+                      {heading}
                     </th>
                   ))}
                 </tr>
               </thead>
 
+              {/* TABLE BODY */}
               <tbody className="divide-y divide-slate-100 dark:divide-[#162033]">
-                {paginated.length === 0 ? (
+
+                {/* NO DATA */}
+                {paginatedTransactions.length ===
+                0 ? (
                   <tr>
                     <td
                       colSpan={5}
@@ -424,40 +533,46 @@ export default function CashBook() {
                     </td>
                   </tr>
                 ) : (
-                  paginated.map((row) => (
-                    <tr
-                      key={row.id}
-                      className="hover:bg-slate-50 dark:hover:bg-[#11182b]"
-                    >
-                      <td className="px-6 py-4">
-                        {row.date}
-                      </td>
+                  paginatedTransactions.map(
+                    (transaction) => (
+                      <tr
+                        key={transaction.id}
+                        className="hover:bg-slate-50 dark:hover:bg-[#11182b]"
+                      >
+                        <td className="px-6 py-4">
+                          {transaction.date}
+                        </td>
 
-                      <td className="px-6 py-4">
-                        {row.particular}
-                      </td>
-
-                      <td className="px-6 py-4">
-                        {row.amount}
-                      </td>
-
-                      <td className="px-6 py-4">
-                        {row.type}
-                      </td>
-
-                      <td className="px-6 py-4">
-                        <button
-                          onClick={() =>
-                            handleDelete(row.id)
+                        <td className="px-6 py-4">
+                          {
+                            transaction.particular
                           }
-                          className="flex items-center gap-1.5 rounded-lg border border-red-200 px-3 py-1.5 text-xs font-medium text-red-500 hover:bg-red-50"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))
+                        </td>
+
+                        <td className="px-6 py-4">
+                          {transaction.amount}
+                        </td>
+
+                        <td className="px-6 py-4">
+                          {transaction.type}
+                        </td>
+
+                        <td className="px-6 py-4">
+                          <button
+                            onClick={() =>
+                              deleteTransaction(
+                                transaction.id,
+                              )
+                            }
+                            className="flex items-center gap-1.5 rounded-lg border border-red-200 px-3 py-1.5 text-xs font-medium text-red-500 hover:bg-red-50"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ),
+                  )
                 )}
               </tbody>
             </table>
@@ -466,24 +581,31 @@ export default function CashBook() {
           {/* PAGINATION */}
           {totalPages > 1 && (
             <div className="flex items-center justify-between border-t border-slate-100 px-6 py-4 dark:border-[#162033]">
+
+              {/* PREVIOUS */}
               <button
                 onClick={() =>
-                  setCurrentPage((p) =>
-                    Math.max(p - 1, 1),
+                  setCurrentPage((prev) =>
+                    Math.max(prev - 1, 1),
                   )
                 }
               >
                 <ChevronLeft />
               </button>
 
+              {/* PAGE INFO */}
               <span>
                 {currentPage} / {totalPages}
               </span>
 
+              {/* NEXT */}
               <button
                 onClick={() =>
-                  setCurrentPage((p) =>
-                    Math.min(p + 1, totalPages),
+                  setCurrentPage((prev) =>
+                    Math.min(
+                      prev + 1,
+                      totalPages,
+                    ),
                   )
                 }
               >
@@ -496,3 +618,31 @@ export default function CashBook() {
     </>
   );
 }
+
+/* =========================================================
+   REUSABLE INPUT FIELD COMPONENT
+========================================================= */
+function InputField({
+  label,
+  icon,
+  children,
+}) {
+  return (
+    <div className="space-y-1.5">
+      <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+        {label}
+      </label>
+
+      <div className="relative">
+        {icon}
+        {children}
+      </div>
+    </div>
+  );
+}
+
+/* =========================================================
+   COMMON INPUT CLASS
+========================================================= */
+const inputClass =
+  "w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-11 pr-4 text-sm outline-none focus:border-[#44a83e] dark:border-[#1b2740] dark:bg-[#11182b]";
