@@ -54,12 +54,13 @@ export default function ManageBanks() {
 
   // Form data
   const [formData, setFormData] = useState({
-    name: "",
-    ifsc: "",
-    accountType: "Savings",
-    accountNumber: "",
-  });
-
+  name: "",
+  ifsc: "",
+  accountType: "Savings",
+  accountNumber: "",
+  branch: "",
+  branchAddress: "",
+});
   /* =========================================================
      HANDLE INPUT CHANGE
   ========================================================= */
@@ -77,11 +78,13 @@ export default function ManageBanks() {
   ========================================================= */
   const resetForm = () => {
     setFormData({
-      name: "",
-      ifsc: "",
-      accountType: "Savings",
-      accountNumber: "",
-    });
+  name: "",
+  ifsc: "",
+  accountType: "Savings",
+  accountNumber: "",
+  branch: "",
+  branchAddress: "",
+});
   };
 
   /* =========================================================
@@ -387,6 +390,36 @@ export default function ManageBanks() {
                     className={inputClass}
                   />
                 </InputField>
+              {/*branch name */}
+                <InputField
+  label="Branch"
+  icon={
+    <Building2 className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+  }
+>
+  <input
+    type="text"
+    name="branch"
+    value={formData.branch}
+    onChange={handleInputChange}
+    className={inputClass}
+  />
+</InputField>
+{/*branch address */}
+<InputField
+  label="Branch Address"
+  icon={
+    <Building2 className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+  }
+>
+  <input
+    type="text"
+    name="branchAddress"
+    value={formData.branchAddress}
+    onChange={handleInputChange}
+    className={inputClass}
+  />
+</InputField>
               </div>
 
               {/* SUBMIT BUTTON */}
@@ -479,6 +512,14 @@ export default function ManageBanks() {
                         "Account Number",
                       key: "accountNumber",
                     },
+                    {
+  label: "Branch",
+  key: "branch",
+},
+{
+  label: "Branch Address",
+  key: "branchAddress",
+},
                   ]}
                   data={filteredBanks}
                 />
@@ -534,12 +575,14 @@ export default function ManageBanks() {
                 <tr className="border-b border-slate-100 dark:border-[#162033]">
 
                   {[
-                    "Bank Name",
-                    "IFSC",
-                    "Type",
-                    "Account No.",
-                    "Actions",
-                  ].map((heading) => (
+  "Bank Name",
+  "IFSC",
+  "Type",
+  "Account No.",
+  "Branch",
+  "Branch Address",
+  "Actions",
+].map((heading) => (
                     <th
                       key={heading}
                       className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-400"
@@ -557,7 +600,7 @@ export default function ManageBanks() {
                 0 ? (
                   <tr>
                     <td
-                      colSpan={5}
+                      colSpan={7}
                       className="py-10 text-center text-sm text-slate-400"
                     >
                       No data found
@@ -589,6 +632,13 @@ export default function ManageBanks() {
                             bank.accountNumber
                           }
                         </td>
+                        <td className="px-6 py-4">
+  {bank.branch}
+</td>
+
+<td className="px-6 py-4">
+  {bank.branchAddress}
+</td>
 
                         {/* ACTION BUTTONS */}
                         <td className="px-6 py-4">
